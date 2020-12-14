@@ -95,6 +95,7 @@ public class ReleaseTrackAssignmentBuilderTest {
         builder.setVersionCodes("42");
         builder.setFilesPattern("**/*.apk");
         builder.setTrackName("production");
+        builder.setReleaseName("1.2.3");
         builder.setRolloutPercentage("5");
         project.getBuildersList().add(builder);
 

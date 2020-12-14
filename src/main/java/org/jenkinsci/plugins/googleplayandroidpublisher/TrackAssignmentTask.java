@@ -25,9 +25,9 @@ class TrackAssignmentTask extends TrackPublisherTask<Boolean> {
     private final List<Long> versionCodes;
 
     TrackAssignmentTask(TaskListener listener, GoogleRobotCredentials credentials, String applicationId,
-                        Collection<Long> versionCodes, String trackName, double rolloutPercentage,
+                        Collection<Long> versionCodes, String trackName, String releaseName, double rolloutPercentage,
                         Integer inAppUpdatePriority) {
-        super(listener, credentials, applicationId, trackName, rolloutPercentage, inAppUpdatePriority);
+        super(listener, credentials, applicationId, trackName, releaseName, rolloutPercentage, inAppUpdatePriority);
         this.versionCodes = new ArrayList<>(versionCodes);
     }
 
@@ -101,7 +101,7 @@ class TrackAssignmentTask extends TrackPublisherTask<Boolean> {
             .orElse(null);
 
         // Assign the version codes to the configured track
-        TrackRelease release = Util.buildRelease(versionCodes, rolloutFraction, inAppUpdatePriority, releaseNotes);
+        TrackRelease release = Util.buildRelease(versionCodes, releaseName, rolloutFraction, inAppUpdatePriority, releaseNotes);
         assignAppFilesToTrack(trackName, rolloutFraction, release);
 
         // Commit the changes

@@ -58,6 +58,7 @@ public class ApkPublisher extends GooglePlayPublisher {
     private String expansionFilesPattern;
     private boolean usePreviousExpansionFilesIfMissing;
     private String trackName;
+    private String releaseName;
     private String rolloutPercentage;
     private RecentChanges[] recentChangeList;
     private String inAppUpdatePriority;
@@ -172,6 +173,16 @@ public class ApkPublisher extends GooglePlayPublisher {
     }
 
     @DataBoundSetter
+    public void setReleaseName(String releaseName) {
+        this.releaseName = releaseName;
+    }
+
+    @Nullable
+    public String getReleaseName() {
+        return fixEmptyAndTrim(releaseName);
+    }
+
+    @DataBoundSetter
     public void setDeobfuscationFilesPattern(String deobfuscationFilesPattern) {
         this.deobfuscationFilesPattern = deobfuscationFilesPattern;
     }
@@ -229,6 +240,10 @@ public class ApkPublisher extends GooglePlayPublisher {
 
     private String getCanonicalTrackName() throws IOException, InterruptedException {
         return expand(getTrackName());
+    }
+
+    private String getExpandedReleaseName() throws IOException, InterruptedException {
+        return expand(getReleaseName());
     }
 
     private String getExpandedDeobfuscationFilesPattern() throws IOException, InterruptedException {
@@ -527,7 +542,7 @@ public class ApkPublisher extends GooglePlayPublisher {
         try {
             GoogleRobotCredentials credentials = getCredentialsHandler().getServiceAccountCredentials(run.getParent());
             return workspace.act(new ApkUploadTask(listener, credentials, applicationId, workspace, validFiles,
-                    expansionFiles, usePreviousExpansionFilesIfMissing, getCanonicalTrackName(),
+                    expansionFiles, usePreviousExpansionFilesIfMissing, getCanonicalTrackName(), getExpandedReleaseName(),
                     getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority()));
         } catch (UploadException e) {
             logger.println(String.format("Upload failed: %s", getPublisherErrorMessage(e)));

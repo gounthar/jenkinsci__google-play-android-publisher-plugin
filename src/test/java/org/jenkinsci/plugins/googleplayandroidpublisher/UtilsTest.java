@@ -33,7 +33,7 @@ public class UtilsTest {
     public void buildRelease_basicInputs() {
         List<Long> versionCodes = Arrays.asList(1L, 2L, 3L);
         double fraction = 0.05;
-        TrackRelease track = Util.buildRelease(versionCodes, fraction,  null, null);
+        TrackRelease track = Util.buildRelease(versionCodes, null, fraction,  null, null);
 
         assertThat(track.getVersionCodes(), contains(1L, 2L, 3L));
         assertEquals(0.05, track.getUserFraction(), 0.001);
@@ -45,7 +45,7 @@ public class UtilsTest {
     public void buildRelease_withZeroFraction_releaseIsComplete() {
         List<Long> versionCodes = Arrays.asList(1L, 2L, 3L);
         double fraction = 0.0;
-        TrackRelease track = Util.buildRelease(versionCodes, fraction, null, null);
+        TrackRelease track = Util.buildRelease(versionCodes, null, fraction, null, null);
 
         assertNull(track.getUserFraction());
         assertEquals("draft", track.getStatus());
@@ -55,7 +55,7 @@ public class UtilsTest {
     public void buildRelease_withNonZeroFraction_releaseIsInProgress() {
         List<Long> versionCodes = Arrays.asList(1L, 2L, 3L);
         double fraction = 0.123;
-        TrackRelease track = Util.buildRelease(versionCodes, fraction, null, null);
+        TrackRelease track = Util.buildRelease(versionCodes, null, fraction, null, null);
 
         assertEquals(0.123, track.getUserFraction(), 0.0001);
         assertEquals("inProgress", track.getStatus());
@@ -66,11 +66,20 @@ public class UtilsTest {
         List<Long> versionCodes = Arrays.asList(1L, 2L, 3L);
         double fraction = 0.123;
         Integer priority = 1;
-        TrackRelease track = Util.buildRelease(versionCodes, fraction, priority, null);
+        TrackRelease track = Util.buildRelease(versionCodes, null, fraction, priority, null);
 
         assertEquals(0.123, track.getUserFraction(), 0.0001);
         assertEquals("inProgress", track.getStatus());
         assertEquals(priority, track.getInAppUpdatePriority());
+    }
+
+    @Test
+    public void buildRelease_releaseName() {
+        List<Long> versionCodes = Arrays.asList(1L, 2L, 3L);
+        double fraction = 1.0;
+        TrackRelease track = Util.buildRelease(versionCodes, "1.2.3", fraction, null, null);
+
+        assertEquals("1.2.3", track.getName());
     }
 
     @Test

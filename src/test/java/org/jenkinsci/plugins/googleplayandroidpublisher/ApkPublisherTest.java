@@ -114,6 +114,7 @@ public class ApkPublisherTest {
         publisher.setExpansionFilesPattern("${EXP_FILES}");
         publisher.setUsePreviousExpansionFilesIfMissing(true);
         publisher.setTrackName("alpha");
+        publisher.setReleaseName("1.2.3");
         publisher.setRolloutPercentage("12.3456789");
         publisher.setRecentChangeList(new ApkPublisher.RecentChanges[] {
             new ApkPublisher.RecentChanges("en", "Hello!"),
@@ -349,6 +350,7 @@ public class ApkPublisherTest {
         assertResultWithLogLines(j, p, Result.SUCCESS,
             "Setting rollout to target 100% of 'production' track users",
             "The 'production' release track will now contain the version code(s): 42",
+            "Using default name for this release",
             "Changes were successfully applied to Google Play"
         );
     }
@@ -367,6 +369,7 @@ public class ApkPublisherTest {
         publisher.setGoogleCredentialsId("folder-credentials");
         publisher.setFilesPattern("**/*.apk");
         publisher.setTrackName("production");
+        publisher.setReleaseName("1.2.3");
         publisher.setRolloutPercentage("100");
         p.getPublishersList().add(publisher);
         setUpApkFile(p);
@@ -378,6 +381,7 @@ public class ApkPublisherTest {
                 "versionCode: 42",
                 "Setting rollout to target 100% of 'production' track users",
                 "The 'production' release track will now contain the version code(s): 42",
+                "Using name '1.2.3' for this release",
                 "Changes were successfully applied to Google Play"
         );
     }
@@ -394,6 +398,7 @@ public class ApkPublisherTest {
             ),
             new StringParameterDefinition("APK_PATTERN", "**/app.apk"),
             new StringParameterDefinition("TRACK_NAME", "production"),
+            new StringParameterDefinition("RELEASE_NAME", "1.2.3"),
             new StringParameterDefinition("ROLLOUT_PCT", "12.5%")
         );
         p.addProperty(pdp);
@@ -403,6 +408,7 @@ public class ApkPublisherTest {
         publisher.setGoogleCredentialsId("${GP_CREDENTIAL}");
         publisher.setFilesPattern("${APK_PATTERN}");
         publisher.setTrackName("${TRACK_NAME}");
+        publisher.setReleaseName("${RELEASE_NAME}");
         publisher.setRolloutPercentage("${ROLLOUT_PCT}");
         p.getPublishersList().add(publisher);
 
@@ -415,6 +421,7 @@ public class ApkPublisherTest {
         assertResultWithLogLines(j, p, Result.SUCCESS,
             "- Credential:     test-credentials",
             "Setting rollout to target 12.5% of 'production' track users",
+            "Using name '1.2.3' for this release",
             "Changes were successfully applied to Google Play"
         );
 
@@ -423,6 +430,7 @@ public class ApkPublisherTest {
                 transport, "/org.jenkins.appId/edits/the-edit-id/tracks/production", Track.class
         );
         TrackRelease release = track.getReleases().get(0);
+        assertEquals("1.2.3", release.getName());
         assertEquals("inProgress", release.getStatus());
         assertEquals(0.125, release.getUserFraction(), 0.0001);
     }
@@ -583,7 +591,24 @@ public class ApkPublisherTest {
         uploadApkWithPipelineAndAssertSuccess(
             stepDefinition,
             "Setting rollout to target 100% of 'production' track users",
+            "Using default name for this release",
             "The 'production' release track will now contain the version code(s): 42"
+        );
+    }
+
+    @Test
+    public void uploadingApkWithPipelineWithReleaseNameSucceeds() throws Exception {
+        // Given a Pipeline with only the required parameters
+        String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
+                "  trackName: 'production',\n" +
+                "  releaseName: '1.2.3',\n" +
+                "  rolloutPercentage: '100'";
+
+        uploadApkWithPipelineAndAssertSuccess(
+                stepDefinition,
+                "Setting rollout to target 100% of 'production' track users",
+                "Using name '1.2.3' for this release",
+                "The 'production' release track will now contain the version code(s): 42"
         );
     }
 
@@ -949,6 +974,7 @@ public class ApkPublisherTest {
                 "versionCode: 42",
                 "Setting rollout to target 100% of 'production' track users",
                 "The 'production' release track will now contain the version code(s): 42",
+                "Using default name for this release",
                 "Changes were successfully applied to Google Play"
         );
     }
