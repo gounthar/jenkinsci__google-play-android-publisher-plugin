@@ -123,7 +123,7 @@ public class Util {
     }
 
     static TrackRelease buildRelease(
-        List<Long> versionCodes, double userFraction, Integer inAppUpdatePriority, @Nullable List<LocalizedText> releaseNotes
+        List<Long> versionCodes, String releaseName, double userFraction, Integer inAppUpdatePriority, @Nullable List<LocalizedText> releaseNotes
     ) {
         final String status;
         final Double fraction;
@@ -144,6 +144,7 @@ public class Util {
 
         TrackRelease release = new TrackRelease()
                 .setVersionCodes(versionCodes)
+                .setName(releaseName)
                 .setUserFraction(fraction)
                 .setInAppUpdatePriority(inAppUpdatePriority)
                 .setStatus(status);

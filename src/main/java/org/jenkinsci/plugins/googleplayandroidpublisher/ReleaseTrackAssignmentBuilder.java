@@ -38,6 +38,7 @@ public class ReleaseTrackAssignmentBuilder extends GooglePlayBuilder {
     private String versionCodes;
     private String filesPattern;
     private String trackName;
+    private String releaseName;
     private String rolloutPercentage;
     private String inAppUpdatePriority;
 
@@ -181,6 +182,16 @@ public class ReleaseTrackAssignmentBuilder extends GooglePlayBuilder {
     }
 
     @DataBoundSetter
+    public void setReleaseName(String releaseName) {
+        this.releaseName = releaseName;
+    }
+
+    @Nullable
+    public String getReleaseName() {
+        return releaseName;
+    }
+
+    @DataBoundSetter
     public void setInAppUpdatePriority(@Nullable String priorityStr) {
         this.inAppUpdatePriority = priorityStr;
     }
@@ -204,6 +215,10 @@ public class ReleaseTrackAssignmentBuilder extends GooglePlayBuilder {
 
     private String getCanonicalTrackName() throws IOException, InterruptedException {
         return expand(getTrackName());
+    }
+
+    private String getExpandedReleaseName() throws IOException, InterruptedException {
+        return expand(getReleaseName());
     }
 
     @Nullable
@@ -331,7 +346,8 @@ public class ReleaseTrackAssignmentBuilder extends GooglePlayBuilder {
         try {
             GoogleRobotCredentials credentials = getCredentialsHandler().getServiceAccountCredentials(run.getParent());
             return workspace.act(new TrackAssignmentTask(listener, credentials, applicationId, versionCodeList,
-                            getCanonicalTrackName(), getExpandedRolloutPercentage(), getExpandedInAppUpdatePriority()));
+                            getCanonicalTrackName(), getExpandedReleaseName(), getExpandedRolloutPercentage(),
+                            getExpandedInAppUpdatePriority()));
         } catch (UploadException e) {
             logger.println(String.format("Assignment failed: %s", getPublisherErrorMessage(e)));
             logger.println("No changes have been applied to the Google Play account");

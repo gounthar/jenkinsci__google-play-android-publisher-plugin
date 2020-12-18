@@ -25,6 +25,10 @@
     <f:combobox style="width:15em" />
   </f:entry>
 
+  <f:entry title="${%Release name}" field="releaseName">
+    <f:textbox style="width:15em" />
+  </f:entry>
+
   <f:entry title="${%Rollout %}" field="rolloutPercentage">
     <f:textbox style="width:15em" />
   </f:entry>

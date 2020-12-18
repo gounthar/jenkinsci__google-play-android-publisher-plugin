@@ -13,14 +13,16 @@ abstract class TrackPublisherTask<V> extends AbstractPublisherTask<V> {
 
     protected final String applicationId;
     protected String trackName;
+    protected final String releaseName;
     protected final double rolloutFraction;
     protected final Integer inAppUpdatePriority;
 
     TrackPublisherTask(TaskListener listener, GoogleRobotCredentials credentials, String applicationId,
-                       String trackName, double rolloutPercentage, Integer inAppUpdatePriority) {
+                       String trackName, String releaseName, double rolloutPercentage, Integer inAppUpdatePriority) {
         super(listener, credentials);
         this.applicationId = applicationId;
         this.trackName = trackName;
+        this.releaseName = releaseName;
         this.rolloutFraction = rolloutPercentage / 100d;
         this.inAppUpdatePriority = inAppUpdatePriority;
     }
@@ -55,6 +57,12 @@ abstract class TrackPublisherTask<V> extends AbstractPublisherTask<V> {
         }
         logger.println(String.format(msgFormat, trackName,
                 join(updatedTrack.getReleases().get(0).getVersionCodes(), ", ")));
+
+        if (releaseName != null && !releaseName.isEmpty()) {
+            logger.println(String.format("Using name '%s' for this release", releaseName));
+        } else {
+            logger.println("Using default name for this release");
+        }
     }
 
 }
