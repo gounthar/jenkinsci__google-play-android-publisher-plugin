@@ -46,6 +46,10 @@ public class UploadFile implements Serializable {
         return metadata.getVersionCode();
     }
 
+    public String getVersionName() {
+        return metadata.getVersionName();
+    }
+
     public String getMinSdkVersion() {
         return metadata.getMinSdkVersion();
     }

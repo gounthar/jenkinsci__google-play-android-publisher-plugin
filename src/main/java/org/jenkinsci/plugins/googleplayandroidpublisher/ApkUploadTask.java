@@ -118,6 +118,7 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
             logger.println(String.format("     File size: %s", humanReadableByteSize(appFile.getFilePath().length())));
             logger.println(String.format("    SHA-1 hash: %s", appFile.getSha1Hash()));
             logger.println(String.format("   versionCode: %d", appFile.getVersionCode()));
+            logger.println(String.format("   versionName: %s", appFile.getVersionName()));
             logger.println(String.format(" minSdkVersion: %s", appFile.getMinSdkVersion()));
 
             // Check whether this file already exists on the server (i.e. uploading it would fail)

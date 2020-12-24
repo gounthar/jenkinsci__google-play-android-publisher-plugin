@@ -12,6 +12,7 @@ public class TestConstants {
     static String DEFAULT_APK_APP_ID = "org.jenkins.appId";
     static String DEFAULT_APK_MIN_SDK_VERSION = "16";
     static int DEFAULT_APK_VERSION_CODE = 42;
+    static final String DEFAULT_APK_VERSION_NAME = "1.42";
     public static final Apk DEFAULT_APK = new Apk()
             .setVersionCode(DEFAULT_APK_VERSION_CODE)
             .setBinary(new ApkBinary().setSha1(DEFAULT_FILE_SHA1));
@@ -19,6 +20,7 @@ public class TestConstants {
     static String DEFAULT_BUNDLE_APP_ID = "org.jenkins.bundleAppId";
     static String DEFAULT_BUNDLE_MIN_SDK_VERSION = "29";
     static int DEFAULT_BUNDLE_VERSION_CODE = 43;
+    static final String DEFAULT_BUNDLE_VERSION_NAME = "1.43";
     public static final Bundle DEFAULT_BUNDLE = new Bundle()
             .setVersionCode(DEFAULT_BUNDLE_VERSION_CODE)
             .setSha1(DEFAULT_FILE_SHA1);
