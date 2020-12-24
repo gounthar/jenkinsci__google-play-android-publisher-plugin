@@ -1,11 +1,16 @@
 package org.jenkinsci.plugins.googleplayandroidpublisher;
 
+import com.google.api.services.androidpublisher.model.LocalizedText;
 import com.google.api.services.androidpublisher.model.Track;
 import com.google.api.services.androidpublisher.model.TrackRelease;
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
 import hudson.model.TaskListener;
+
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
+
 import static hudson.Util.join;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.PERCENTAGE_FORMATTER;
 
@@ -27,14 +32,15 @@ abstract class TrackPublisherTask<V> extends AbstractPublisherTask<V> {
         this.inAppUpdatePriority = inAppUpdatePriority;
     }
 
-    /**
-     * Assigns a release, which contains a list of version codes, to a release track.
-     *
-     * @param trackName The track to which the version codes should be assigned.
-     * @param rolloutFraction The rollout fraction, if track is a staged rollout.
-     */
-    void assignAppFilesToTrack(String trackName, double rolloutFraction, TrackRelease release) throws IOException {
+    /** Assigns a release, which contains a list of version codes, to a release track. */
+    void assignAppFilesToTrack(
+        String trackName, double rolloutFraction, List<Long> versionCodes, @Nullable Integer inAppUpdatePriority,
+        @Nullable String releaseName, @Nullable List<LocalizedText> releaseNotes
+    ) throws IOException {
         // Prepare to assign the release to the desired track
+        final TrackRelease release = Util.buildRelease(
+            versionCodes, releaseName, rolloutFraction, inAppUpdatePriority, releaseNotes
+        );
         final Track trackToAssign = new Track()
                 .setTrack(trackName)
                 .setReleases(Collections.singletonList(release));

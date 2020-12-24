@@ -613,6 +613,22 @@ public class ApkPublisherTest {
     }
 
     @Test
+    public void uploadingApkWithPipelineWithReleaseNameReplacementSucceeds() throws Exception {
+        // Given a Pipeline with only the required parameters
+        String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
+                "  trackName: 'production',\n" +
+                "  releaseName: 'Release: {versionName} ({versionCode})',\n" +
+                "  rolloutPercentage: '100'";
+
+        uploadApkWithPipelineAndAssertSuccess(
+                stepDefinition,
+                "Setting rollout to target 100% of 'production' track users",
+                "Using name 'Release: 1.42 (42)' for this release",
+                "The 'production' release track will now contain the version code(s): 42"
+        );
+    }
+
+    @Test
     public void uploadingApkWithPipelineWithRolloutPercentSucceeds() throws Exception {
         // Given a step with a deprecated `rolloutPercent` value
         String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +

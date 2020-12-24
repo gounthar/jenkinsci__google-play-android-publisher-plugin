@@ -2,16 +2,18 @@ package org.jenkinsci.plugins.googleplayandroidpublisher.internal;
 
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
-import java.io.File;
-
 import org.mockito.stubbing.Answer;
+
+import java.io.File;
 
 import static org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestConstants.DEFAULT_APK_APP_ID;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestConstants.DEFAULT_APK_MIN_SDK_VERSION;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestConstants.DEFAULT_APK_VERSION_CODE;
+import static org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestConstants.DEFAULT_APK_VERSION_NAME;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestConstants.DEFAULT_BUNDLE_APP_ID;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestConstants.DEFAULT_BUNDLE_MIN_SDK_VERSION;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestConstants.DEFAULT_BUNDLE_VERSION_CODE;
+import static org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestConstants.DEFAULT_BUNDLE_VERSION_NAME;
 import static org.mockito.Mockito.mock;
 
 public class TestUtilImpl implements JenkinsUtil, AndroidUtil {

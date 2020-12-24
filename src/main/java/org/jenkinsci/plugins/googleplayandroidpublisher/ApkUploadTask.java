@@ -8,13 +8,14 @@ import com.google.api.services.androidpublisher.model.ExpansionFile;
 import com.google.api.services.androidpublisher.model.ExpansionFilesUploadResponse;
 import com.google.api.services.androidpublisher.model.LocalizedText;
 import com.google.api.services.androidpublisher.model.Track;
-import com.google.api.services.androidpublisher.model.TrackRelease;
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.AppFileFormat;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.UploadFile;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -181,10 +182,11 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
         }
 
         // Assign all uploaded app files to the configured track
-        List<LocalizedText> releaseNotes = Util.transformReleaseNotes(recentChangeList);
-        TrackRelease release =
-                Util.buildRelease(uploadedVersionCodes, releaseName, rolloutFraction, inAppUpdatePriority, releaseNotes);
-        assignAppFilesToTrack(trackName, rolloutFraction, release);
+        final String expandedReleaseName = expandReleaseName(releaseName, appFilesToUpload);
+        final List<LocalizedText> releaseNotes = Util.transformReleaseNotes(recentChangeList);
+        assignAppFilesToTrack(
+            trackName, rolloutFraction, uploadedVersionCodes, inAppUpdatePriority, expandedReleaseName, releaseNotes
+        );
 
         // Commit all the changes
         try {
@@ -368,6 +370,16 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
             path = path.substring(1);
         }
         return path;
+    }
+
+    @Nullable
+    private static String expandReleaseName(@Nullable String releaseName, @Nonnull List<UploadFile> appFilesToUpload) {
+        if (releaseName == null) {
+            return null;
+        }
+        return releaseName
+            .replace("{versionCode}", String.valueOf(appFilesToUpload.get(0).getVersionCode()))
+            .replace("{versionName}", appFilesToUpload.get(0).getVersionName());
     }
 
 }

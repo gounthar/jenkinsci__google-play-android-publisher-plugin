@@ -1,6 +1,14 @@
 <div>
-  The release name, used to identify this release in the Play Console UI. Not required to be
-  unique. This is optional, if not set it will be generated from the version_name in the APKs.
+  The release name, used to identify this release in the Google Play Console UI.
+  Not required to be unique among releases. If no value is entered, Google Play
+  will set the release name to the versionName of the app file being uploaded.
+  <p/>
+  Any instances of <tt>{versionCode}</tt> or <tt>{versionName}</tt> in the value
+  will be replaced by the respective value from the app file being uploaded. If
+  multiple files are uploaded, the one with the lowest versionCode will be used.
+  <p/>
+  For example, entering <tt>Version {versionName}-${GIT_COMMIT}</tt> as release name could
+  yield a release name on Google Play something like <tt>Version 1.2.3-b2c3d3e4</tt>.
   <hr/>
   This field supports substituting environment variables in the form
   <tt>${SOME_VARIABLE}</tt> or <tt>$SOME_VARIABLE</tt> at build time.
