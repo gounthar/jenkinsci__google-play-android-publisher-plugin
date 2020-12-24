@@ -39,12 +39,16 @@ public class Util {
     static final String REGEX_VARIABLE = "\\$([A-Za-z0-9_]+|\\{[A-Za-z0-9_]+\\}|\\$)";
 
     /** A (potentially non-exhaustive) list of languages supported by Google Play for app description text etc.. */
-    static final String[] SUPPORTED_LANGUAGES =
-            { "af", "am", "ar", "be", "bg", "ca", "cs-CZ", "da-DK", "de-DE", "el-GR", "en-GB", "en-US", "es-419",
-                    "es-ES", "es-US", "et", "fa", "fi-FI", "fil", "fr-CA", "fr-FR", "hi-IN", "hr", "hu-HU", "id",
-                    "it-IT", "iw-IL", "ja-JP", "ko-KR", "lt", "lv", "ms", "nl-NL", "no-NO", "pl-PL", "pt-BR", "pt-PT",
-                    "rm", "ro", "ru-RU", "sk", "sl", "sr", "sv-SE", "sw", "th", "tr-TR", "uk", "vi", "zh-CN", "zh-TW",
-                    "zu" };
+    // See here for the list: https://support.google.com/googleplay/android-developer/answer/9844778
+    static final String[] SUPPORTED_LANGUAGES = {
+        "af", "am", "ar", "az-AZ", "be", "bg", "bn-BD", "ca", "cs-CZ", "da-DK", "de-DE", "el-GR", "en-AU", "en-CA",
+        "en-GB", "en-IN", "en-SG", "en-US", "en-ZA", "es-419", "es-ES", "es-US", "et", "eu-ES", "fa", "fa-AE", "fa-AF",
+        "fa-IR", "fi-FI", "fil", "fr-CA", "fr-FR", "gl-ES", "gu", "hi-IN", "hr", "hu-HU", "hy-AM", "id", "is-IS",
+        "it-IT", "iw-IL", "ja-JP", "ka-GE", "kk", "km-KH", "kn-IN", "ko-KR", "ky-KG", "lo-LA", "lt", "lv", "mk-MK",
+        "ml-IN", "mn-MN", "mr-IN", "ms", "ms-MY", "my-MM", "ne-NP", "nl-NL", "no-NO", "pa", "pl-PL", "pt-BR", "pt-PT",
+        "rm", "ro", "ru-RU", "si-LK", "sk", "sl", "sq", "sr", "sv-SE", "sw", "ta-IN", "te-IN", "th", "tr-TR", "uk",
+        "ur", "vi", "zh-CN", "zh-HK", "zh-TW", "zu"
+    };
 
     /** @return The version of this Jenkins plugin, e.g. "1.0" or "1.1-SNAPSHOT" (for dev releases). */
     public static String getPluginVersion() {
