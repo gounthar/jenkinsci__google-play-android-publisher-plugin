@@ -295,30 +295,12 @@ public class ApkPublisherTest {
 
         p.getPublishersList().add(publisher);
 
-        // Authenticating to Google Play API...
-        // - Credential:     test-credentials
-        // - Application ID: org.jenkins.appId
-        //
-        // Uploading 1 file(s) with application ID: org.jenkins.appId
-        //
-        //       APK file: build/outputs/apk/app.apk
-        //     SHA-1 hash: da39a3ee5e6b4b0d3255bfef95601890afd80709
-        //    versionCode: 42
-        //  minSdkVersion: 16
-        //
-        // Setting rollout to target 100% of 'production' track users
-        // The 'production' release track will now contain the version code(s): 42
-        //
-        // Applying changes to Google Play...
-        // Changes were successfully applied to Google Play
-
         assertResultWithLogLines(j, p, Result.SUCCESS,
-                "Uploading 1 file(s) with application ID: org.jenkins.appId",
-                "APK file: " + join(Arrays.asList("build", "outputs", "apk", "app.apk"), File.separator),
-                "versionCode: 42",
-                "Setting rollout to target 100% of 'production' track users",
-                "The 'production' release track will now contain the version code(s): 42",
-                "Changes were successfully applied to Google Play"
+            "APK file: " + join(Arrays.asList("build", "outputs", "apk", "app.apk"), File.separator),
+            "Updating release track 'production':",
+            "- Version codes:   42",
+            "- Staged rollout:  100% ",
+            "Changes were successfully applied to Google Play"
         );
 
         // And we should have set completed status when updating the track
@@ -348,9 +330,12 @@ public class ApkPublisherTest {
         // When a build occurs
         // Then it should find the APK using the default pattern, and upload to 100% of users
         assertResultWithLogLines(j, p, Result.SUCCESS,
-            "Setting rollout to target 100% of 'production' track users",
-            "The 'production' release track will now contain the version code(s): 42",
-            "Using default name for this release",
+            "Updating release track 'production':",
+            "- Version codes:   42",
+            "- Staged rollout:  100%",
+            "- Update priority: (default)",
+            "- Release name:    (default)",
+            "- Release notes:   (none)",
             "Changes were successfully applied to Google Play"
         );
     }
@@ -376,13 +361,13 @@ public class ApkPublisherTest {
 
         // When a build occurs, it should succeed
         assertResultWithLogLines(j, p, Result.SUCCESS,
-                "Uploading 1 file(s) with application ID: org.jenkins.appId",
-                "APK file: " + join(Arrays.asList("build", "outputs", "apk", "app.apk"), File.separator),
-                "versionCode: 42",
-                "Setting rollout to target 100% of 'production' track users",
-                "The 'production' release track will now contain the version code(s): 42",
-                "Using name '1.2.3' for this release",
-                "Changes were successfully applied to Google Play"
+            "Uploading 1 file(s) with application ID: org.jenkins.appId",
+            "APK file: " + join(Arrays.asList("build", "outputs", "apk", "app.apk"), File.separator),
+            "versionCode: 42",
+            "Updating release track 'production':",
+            "- Version codes:   42",
+            "- Release name:    1.2.3",
+            "Changes were successfully applied to Google Play"
         );
     }
 
@@ -420,8 +405,10 @@ public class ApkPublisherTest {
         // When a build occurs, it should apply the default parameter values
         assertResultWithLogLines(j, p, Result.SUCCESS,
             "- Credential:     test-credentials",
-            "Setting rollout to target 12.5% of 'production' track users",
-            "Using name '1.2.3' for this release",
+            "Updating release track 'production':",
+            "- Version codes:   42",
+            "- Staged rollout:  12.5%",
+            "- Release name:    1.2.3",
             "Changes were successfully applied to Google Play"
         );
 
@@ -453,7 +440,9 @@ public class ApkPublisherTest {
 
         // When a build occurs, it should upload as a draft
         assertResultWithLogLines(j, p, Result.SUCCESS,
-            "New 'production' draft release created, with the version code(s): 42",
+            "Updating release track 'production':",
+            "- Version codes:   42",
+            "- Staged rollout:  0% (draft)",
             "Changes were successfully applied to Google Play"
         );
 
@@ -527,8 +516,9 @@ public class ApkPublisherTest {
         // When a build occurs
         // Then the APK should be successfully uploaded and assigned to the custom track
         assertResultWithLogLines(j, p, Result.SUCCESS,
-            "Setting rollout to target 100% of 'dogfood' track users",
-            "The 'dogfood' release track will now contain the version code(s): 42",
+            "Updating release track 'dogfood':",
+            "- Version codes:   42",
+            "- Staged rollout:  100%",
             "Changes were successfully applied to Google Play"
         );
     }
@@ -554,8 +544,7 @@ public class ApkPublisherTest {
         // And we should have seen the warning about the track not being returned by Google Play
         assertResultWithLogLines(j, p, Result.SUCCESS,
             "Release track 'dogfood' could not be found",
-            "Setting rollout to target 100% of 'dogfood' track users",
-            "The 'dogfood' release track will now contain the version code(s): 42",
+            "Updating release track 'dogfood':",
             "Changes were successfully applied to Google Play"
         );
     }
@@ -590,9 +579,12 @@ public class ApkPublisherTest {
 
         uploadApkWithPipelineAndAssertSuccess(
             stepDefinition,
-            "Setting rollout to target 100% of 'production' track users",
-            "Using default name for this release",
-            "The 'production' release track will now contain the version code(s): 42"
+            "Updating release track 'production':",
+            "- Version codes:   42",
+            "- Staged rollout:  100%",
+            "- Update priority: (default)",
+            "- Release name:    (default)",
+            "- Release notes:   (none)"
         );
     }
 
@@ -605,10 +597,13 @@ public class ApkPublisherTest {
                 "  rolloutPercentage: '100'";
 
         uploadApkWithPipelineAndAssertSuccess(
-                stepDefinition,
-                "Setting rollout to target 100% of 'production' track users",
-                "Using name '1.2.3' for this release",
-                "The 'production' release track will now contain the version code(s): 42"
+            stepDefinition,
+            "Updating release track 'production':",
+            "- Version codes:   42",
+            "- Staged rollout:  100%",
+            "- Update priority: (default)",
+            "- Release name:    1.2.3",
+            "- Release notes:   (none)"
         );
     }
 
@@ -621,10 +616,13 @@ public class ApkPublisherTest {
                 "  rolloutPercentage: '100'";
 
         uploadApkWithPipelineAndAssertSuccess(
-                stepDefinition,
-                "Setting rollout to target 100% of 'production' track users",
-                "Using name 'Release: 1.42 (42)' for this release",
-                "The 'production' release track will now contain the version code(s): 42"
+            stepDefinition,
+            "Updating release track 'production':",
+            "- Version codes:   42",
+            "- Staged rollout:  100%",
+            "- Update priority: (default)",
+            "- Release name:    Release: 1.42 (42)",
+            "- Release notes:   (none)"
         );
     }
 
@@ -638,8 +636,7 @@ public class ApkPublisherTest {
         // When a build occurs, it should roll out to that percentage
         uploadApkWithPipelineAndAssertSuccess(
             stepDefinition,
-            "Setting rollout to target 12.34% of 'production' track users",
-            "The 'production' release track will now contain the version code(s): 42"
+            "- Staged rollout:  12.34%"
         );
     }
 
@@ -654,8 +651,7 @@ public class ApkPublisherTest {
         // When a build occurs, it should prefer the string `rolloutPercentage` value
         uploadApkWithPipelineAndAssertSuccess(
             stepDefinition,
-            "Setting rollout to target 56.789% of 'production' track users",
-            "The 'production' release track will now contain the version code(s): 42"
+            "- Staged rollout:  56.789%"
         );
     }
 
@@ -669,7 +665,7 @@ public class ApkPublisherTest {
         // When a build occurs, it should upload as a draft
         uploadApkWithPipelineAndAssertSuccess(
             stepDefinition,
-            "New 'production' draft release created, with the version code(s): 42"
+            "- Staged rollout:  0% (draft)"
         );
 
         // And we should have set draft status when updating the track
@@ -695,8 +691,7 @@ public class ApkPublisherTest {
         // Then the APK should be successfully uploaded and assigned to the custom track
         uploadApkWithPipelineAndAssertSuccess(
             stepDefinition,
-            "Setting rollout to target 100% of 'dogfood' track users",
-            "The 'dogfood' release track will now contain the version code(s): 42"
+            "Updating release track 'dogfood'"
         );
     }
 
@@ -832,31 +827,16 @@ public class ApkPublisherTest {
 
         p.getPublishersList().add(publisher);
 
-        // Authenticating to Google Play API...
-        // - Credential:     test-credentials
-        // - Application ID: org.jenkins.bundleAppId
-        //
-        // Uploading 1 file(s) with application ID: org.jenkins.bundleAppId
-        //
-        //       AAB file: build/outputs/bundle/release/bundle.aab
-        //     SHA-1 hash: da39a3ee5e6b4b0d3255bfef95601890afd80709
-        //    versionCode: 43
-        //  minSdkVersion: 29
-        //
-        // Setting rollout to target 100% of 'production' track users
-        // The 'production' release track will now contain the version code(s): 43
-        //
-        // Applying changes to Google Play...
-        // Changes were successfully applied to Google Play
-
         assertResultWithLogLines(j, p, Result.SUCCESS,
-                "Uploading 1 file(s) with application ID: org.jenkins.bundleAppId",
-                "AAB file: " + join(Arrays.asList("build", "outputs", "bundle", "release", "bundle.aab"), File.separator),
-                "versionCode: 43",
-                "minSdkVersion: 29",
-                "Setting rollout to target 100% of 'production' track users",
-                "The 'production' release track will now contain the version code(s): 43",
-                "Changes were successfully applied to Google Play"
+            "Uploading 1 file(s) with application ID: org.jenkins.bundleAppId",
+            "AAB file: " + join(Arrays.asList("build", "outputs", "bundle", "release", "bundle.aab"), File.separator),
+            "versionCode: 43",
+            "minSdkVersion: 29",
+            "Updating release track 'production':",
+            "- Application ID:  org.jenkins.bundleAppId",
+            "- Version codes:   43",
+            "- Staged rollout:  100%",
+            "Changes were successfully applied to Google Play"
         );
     }
 
@@ -887,9 +867,7 @@ public class ApkPublisherTest {
         // And the AAB upload should succeed, without uploading the APK
         assertResultWithLogLines(j, p, Result.SUCCESS,
             "Both AAB and APK files were found; only the AAB files will be uploaded",
-            "Uploading 1 file(s) with application ID: com.example.test",
-            "AAB file: " + join(Arrays.asList("build", "outputs", "bundle", "release", "bundle.aab"), File.separator),
-            "The 'production' release track will now contain the version code(s): 43"
+            "AAB file: " + join(Arrays.asList("build", "outputs", "bundle", "release", "bundle.aab"), File.separator)
         );
     }
 
@@ -911,12 +889,10 @@ public class ApkPublisherTest {
 
         // When a build occurs, it should succeed
         assertResultWithLogLines(j, p, Result.SUCCESS,
-                "Uploading 1 file(s) with application ID: org.jenkins.bundleAppId",
-                "AAB file: " + join(Arrays.asList("build", "outputs", "bundle", "release", "bundle.aab"), File.separator),
-                "versionCode: 43",
-                "Setting rollout to target 100% of 'production' track users",
-                "The 'production' release track will now contain the version code(s): 43",
-                "Changes were successfully applied to Google Play"
+            "Uploading 1 file(s) with application ID: org.jenkins.bundleAppId",
+            "AAB file: " + join(Arrays.asList("build", "outputs", "bundle", "release", "bundle.aab"), File.separator),
+            "versionCode: 43",
+            "Updating release track 'production':"
         );
     }
 
@@ -967,31 +943,14 @@ public class ApkPublisherTest {
 
         p.getPublishersList().add(publisher);
 
-        // Authenticating to Google Play API...
-        // - Credential:     test-credentials
-        // - Application ID: org.jenkins.appId
-        //
-        // Uploading 1 file(s) with application ID: org.jenkins.appId
-        //
-        //       APK file: build/outputs/apk/app.apk
-        //     SHA-1 hash: da39a3ee5e6b4b0d3255bfef95601890afd80709
-        //    versionCode: 42
-        //  minSdkVersion: 16
-        //
-        // Setting rollout to target 100% of 'production' track users
-        // The 'production' release track will now contain the version code(s): 42
-        //
-        // Applying changes to Google Play...
-        // Changes were successfully applied to Google Play
-
         assertResultWithLogLines(j, p, Result.SUCCESS,
-                "Uploading 1 file(s) with application ID: org.jenkins.appId",
-                "APK file: " + join(Arrays.asList("build", "outputs", "apk", "app.apk"), File.separator),
-                "versionCode: 42",
-                "Setting rollout to target 100% of 'production' track users",
-                "The 'production' release track will now contain the version code(s): 42",
-                "Using default name for this release",
-                "Changes were successfully applied to Google Play"
+            "Uploading 1 file(s) with application ID: org.jenkins.appId",
+            "APK file: " + join(Arrays.asList("build", "outputs", "apk", "app.apk"), File.separator),
+            "versionCode: 42",
+            "Setting rollout to target 100% of 'production' track users",
+            "The 'production' release track will now contain the version code(s): 42",
+            "Using default name for this release",
+            "Changes were successfully applied to Google Play"
         );
     }
 

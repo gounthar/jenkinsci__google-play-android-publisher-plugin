@@ -4,7 +4,6 @@ import com.google.api.services.androidpublisher.model.Apk;
 import com.google.api.services.androidpublisher.model.Bundle;
 import com.google.api.services.androidpublisher.model.LocalizedText;
 import com.google.api.services.androidpublisher.model.Track;
-import com.google.api.services.androidpublisher.model.TrackRelease;
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
 import hudson.model.TaskListener;
 
@@ -59,10 +58,6 @@ class TrackAssignmentTask extends TrackPublisherTask<Boolean> {
             trackName = canonicalTrackName;
         }
 
-        // Log some useful information
-        logger.println(String.format("Assigning %d version(s) with application ID %s to '%s' release track",
-                versionCodes.size(), applicationId, trackName));
-
         // Check that all version codes to assign actually exist already on the server
         // (We could remove this block since Google Play does this check nowadays, but its error messages are
         //  slightly misleading, as they always refer to APK files, even if we're trying to assign AAB files)
@@ -81,10 +76,6 @@ class TrackAssignmentTask extends TrackPublisherTask<Boolean> {
             logger.println(String.format("Assignment will fail, as these versions do not exist on Google Play: %s",
                     join(missingVersionCodes, ", ")));
             return false;
-        }
-
-        if (inAppUpdatePriority != null) {
-            logger.println(String.format("Setting in-app update priority to %d", inAppUpdatePriority));
         }
 
         // Attempt to locate any release notes already uploaded for these files, so we can assign them to the new track

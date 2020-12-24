@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static hudson.Util.join;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.PERCENTAGE_FORMATTER;
@@ -42,33 +43,29 @@ abstract class TrackPublisherTask<V> extends AbstractPublisherTask<V> {
             versionCodes, releaseName, rolloutFraction, inAppUpdatePriority, releaseNotes
         );
         final Track trackToAssign = new Track()
-                .setTrack(trackName)
-                .setReleases(Collections.singletonList(release));
+            .setTrack(trackName)
+            .setReleases(Collections.singletonList(release));
 
+        // Log what's happening
         final boolean isDraft = release.getStatus().equals("draft");
-        if (!isDraft) {
-            logger.println(String.format("Setting rollout to target %s%% of '%s' track users",
-                    PERCENTAGE_FORMATTER.format(rolloutFraction * 100), trackName));
-        }
+        logger.printf("Updating release track '%s':%n", trackName);
+        logger.printf("- Application ID:  %s%n", applicationId);
+        logger.printf("- Version codes:   %s%n", join(versionCodes, ", "));
+        logger.printf("- Staged rollout:  %s%% %s%n", PERCENTAGE_FORMATTER.format(rolloutFraction * 100), isDraft ? "(draft)" : "");
+        logger.printf("- Update priority: %s%n", inAppUpdatePriority == null ? "(default)" : inAppUpdatePriority);
+        logger.printf("- Release name:    %s%n", releaseName == null ? "(default)" : releaseName);
+        logger.printf("- Release notes:   %s%n%n", joinReleaseNoteLanguages(releaseNotes));
 
-        // Assign the new file(s) to the desired track
-        Track updatedTrack =
-                editService.tracks().update(applicationId, editId, trackToAssign.getTrack(), trackToAssign).execute();
+        // Update the track
+        editService.tracks().update(applicationId, editId, trackToAssign.getTrack(), trackToAssign).execute();
+    }
 
-        final String msgFormat;
-        if (isDraft) {
-            msgFormat = "New '%s' draft release created, with the version code(s): %s%n";
-        } else {
-            msgFormat = "The '%s' release track will now contain the version code(s): %s%n";
+    private static String joinReleaseNoteLanguages(List<LocalizedText> releaseNotes) {
+        if (releaseNotes == null) {
+            return "(none)";
         }
-        logger.println(String.format(msgFormat, trackName,
-                join(updatedTrack.getReleases().get(0).getVersionCodes(), ", ")));
-
-        if (releaseName != null && !releaseName.isEmpty()) {
-            logger.println(String.format("Using name '%s' for this release", releaseName));
-        } else {
-            logger.println("Using default name for this release");
-        }
+        List<String> list = releaseNotes.stream().map(LocalizedText::getLanguage).sorted().collect(Collectors.toList());
+        return join(list, ", ");
     }
 
 }

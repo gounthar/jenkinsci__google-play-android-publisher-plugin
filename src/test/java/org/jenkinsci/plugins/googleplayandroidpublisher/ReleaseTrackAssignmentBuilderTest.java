@@ -228,29 +228,20 @@ public class ReleaseTrackAssignmentBuilderTest {
         setUpTransportForSuccess();
 
         FreeStyleProject p = j.createFreeStyleProject("moveReleaseTrack");
-
         ReleaseTrackAssignmentBuilder builder = createBuilder();
-
-        // Authenticating to Google Play API...
-        // - Credential:     test-credentials
-        // - Application ID: org.jenkins.appId
-        // Assigning 1 version(s) with application ID org.jenkins.appId to 'production' release track
-        // Setting rollout to target 100% of 'production' track users
-        // The 'production' release track will now contain the version code(s): 42
-        //
-        // Applying changes to Google Play...
-        // Changes were successfully applied to Google Play
-        // Finished: SUCCESS
-
         p.getBuildersList().add(builder);
         QueueTaskFuture<FreeStyleBuild> scheduled = p.scheduleBuild2(0);
         j.assertBuildStatusSuccess(scheduled);
 
         assertLogLines(j, scheduled,
-                "Assigning 1 version(s) with application ID org.jenkins.appId to 'production' release track",
-                "Setting rollout to target 5% of 'production' track users",
-                "The 'production' release track will now contain the version code(s): 42",
-                "Changes were successfully applied to Google Play"
+            "Updating release track 'production':",
+            "- Application ID:  org.jenkins.appId",
+            "- Version codes:   42",
+            "- Staged rollout:  5%",
+            "- Update priority: (default)",
+            "- Release name:    (default)",
+            "- Release notes:   de-DE, en-GB",
+            "Changes were successfully applied to Google Play"
         );
 
         // And we should have included the existing release notes when updating the new track
@@ -260,8 +251,8 @@ public class ReleaseTrackAssignmentBuilderTest {
         List<LocalizedText> releaseNotes = track.getReleases().get(0).getReleaseNotes();
         assertNotNull(releaseNotes);
         assertEquals(2, releaseNotes.size());
-        assertEquals("Notes: en_GB", releaseNotes.get(0).getText());
-        assertEquals("Notes: de_DE", releaseNotes.get(1).getText());
+        assertEquals("Notes: en-GB", releaseNotes.get(0).getText());
+        assertEquals("Notes: de-DE", releaseNotes.get(1).getText());
     }
 
     @Test
@@ -278,7 +269,13 @@ public class ReleaseTrackAssignmentBuilderTest {
 
         // When a build occurs, it should create the release in the target track as a draft
         assertResultWithLogLines(j, p, Result.SUCCESS,
-            "New 'production' draft release created, with the version code(s): 42",
+            "Updating release track 'production':",
+            "- Application ID:  org.jenkins.appId",
+            "- Version codes:   42",
+            "- Staged rollout:  0% (draft)",
+            "- Update priority: (default)",
+            "- Release name:    (default)",
+            "- Release notes:   de-DE, en-GB",
             "Changes were successfully applied to Google Play"
         );
 
@@ -306,9 +303,8 @@ public class ReleaseTrackAssignmentBuilderTest {
         // When a build occurs
         // Then the APK should be successfully assigned to the custom track
         assertResultWithLogLines(j, p, Result.SUCCESS,
-            "Assigning 1 version(s) with application ID org.jenkins.appId to 'dogfood' release track",
-            "Setting rollout to target 5% of 'dogfood' track users",
-            "The 'dogfood' release track will now contain the version code(s): 42",
+            "Updating release track 'dogfood':",
+            "- Staged rollout:  5%",
             "Changes were successfully applied to Google Play"
         );
     }
@@ -330,11 +326,10 @@ public class ReleaseTrackAssignmentBuilderTest {
         // Then the APK should be successfully assigned to the custom track
         // And we should have seen the warning about the track not being returned by Google Play
         assertResultWithLogLines(j, p, Result.SUCCESS,
-                "Release track 'dogfood' could not be found on Google Play",
-                "Assigning 1 version(s) with application ID org.jenkins.appId to 'dogfood' release track",
-                "Setting rollout to target 5% of 'dogfood' track users",
-                "The 'dogfood' release track will now contain the version code(s): 42",
-                "Changes were successfully applied to Google Play"
+            "Release track 'dogfood' could not be found on Google Play",
+            "Updating release track 'dogfood':",
+            "- Staged rollout:  5%",
+            "Changes were successfully applied to Google Play"
         );
     }
 
@@ -433,8 +428,12 @@ public class ReleaseTrackAssignmentBuilderTest {
 
         moveApkTrackWithPipelineAndAssertSuccess(
             stepDefinition,
-                "Setting rollout to target 100% of 'production' track users",
-                "Setting in-app update priority to 2"
+            "Updating release track 'production':",
+            "- Application ID:  org.jenkins.appId",
+            "- Version codes:   42",
+            "- Staged rollout:  100%",
+            "- Update priority: 2",
+            "Changes were successfully applied to Google Play"
         );
     }
 
@@ -449,7 +448,10 @@ public class ReleaseTrackAssignmentBuilderTest {
             "    rolloutPercentage: '100'";
 
         moveApkTrackWithPipelineAndAssertSuccess(
-            stepDefinition, "Setting rollout to target 100% of 'production' track users"
+            stepDefinition,
+            "Updating release track 'production':",
+            "- Staged rollout:  100%",
+            "Changes were successfully applied to Google Play"
         );
     }
 
@@ -466,7 +468,10 @@ public class ReleaseTrackAssignmentBuilderTest {
 
         // When a build occurs, it should roll out to that percentage
         moveApkTrackWithPipelineAndAssertSuccess(
-            stepDefinition, "Setting rollout to target 12.34% of 'production' track users"
+            stepDefinition,
+            "Updating release track 'production':",
+            "- Staged rollout:  12.34%",
+            "Changes were successfully applied to Google Play"
         );
     }
 
@@ -484,7 +489,10 @@ public class ReleaseTrackAssignmentBuilderTest {
 
         // When a build occurs, it should prefer the string `rolloutPercentage` value
         moveApkTrackWithPipelineAndAssertSuccess(
-            stepDefinition, "Setting rollout to target 56.789% of 'production' track users"
+            stepDefinition,
+            "Updating release track 'production':",
+            "- Staged rollout:  56.789%",
+            "Changes were successfully applied to Google Play"
         );
     }
 
@@ -502,7 +510,8 @@ public class ReleaseTrackAssignmentBuilderTest {
         // When a build occurs, it should upload as a draft
         moveApkTrackWithPipelineAndAssertSuccess(
             stepDefinition,
-            "New 'production' draft release created, with the version code(s): 42"
+            "Updating release track 'production':",
+            "- Staged rollout:  0% (draft)"
         );
 
         // And we should have set draft status when updating the track
@@ -532,9 +541,8 @@ public class ReleaseTrackAssignmentBuilderTest {
         // Then the APK should be successfully assigned to the custom track
         moveApkTrackWithPipelineAndAssertSuccess(
             stepDefinition,
-            "Assigning 1 version(s) with application ID org.jenkins.appId to 'dogfood' release track",
-            "Setting rollout to target 5% of 'dogfood' track users",
-            "The 'dogfood' release track will now contain the version code(s): 42"
+            "Updating release track 'dogfood':",
+            "- Staged rollout:  5%"
         );
     }
 
@@ -617,27 +625,13 @@ public class ReleaseTrackAssignmentBuilderTest {
         p.setAssignedNode(agent);
 
         ReleaseTrackAssignmentBuilder builder = createBuilder();
-
-        // Authenticating to Google Play API...
-        // - Credential:     test-credentials
-        // - Application ID: org.jenkins.appId
-        // Assigning 1 version(s) with application ID org.jenkins.appId to 'production' release track
-        // Setting rollout to target 100% of 'production' track users
-        // The 'production' release track will now contain the version code(s): 42
-        //
-        // Applying changes to Google Play...
-        // Changes were successfully applied to Google Play
-        // Finished: SUCCESS
-
         p.getBuildersList().add(builder);
         QueueTaskFuture<FreeStyleBuild> scheduled = p.scheduleBuild2(0);
         j.assertBuildStatusSuccess(scheduled);
 
         assertLogLines(j, scheduled,
-                "Assigning 1 version(s) with application ID org.jenkins.appId to 'production' release track",
-                "Setting rollout to target 5% of 'production' track users",
-                "The 'production' release track will now contain the version code(s): 42",
-                "Changes were successfully applied to Google Play"
+            "Updating release track 'production':",
+            "- Staged rollout:  5%"
         );
     }
 
@@ -661,7 +655,7 @@ public class ReleaseTrackAssignmentBuilderTest {
                     new FakeListTracksResponse().setTracks(
                         new ArrayList<Track>() {{
                             add(track("production"));
-                            add(track("beta", release(42, "en_GB", "de_DE")));
+                            add(track("beta", release(42, "en-GB", "de-DE")));
                             add(track("alpha"));
                             add(track("internal"));
                             if (includeTrackInList) {
