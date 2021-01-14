@@ -34,6 +34,7 @@ import static hudson.Functions.humanReadableByteSize;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.ApkPublisher.ExpansionFileSet;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.ApkPublisher.RecentChanges;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUSCATION_FILE_TYPE_PROGUARD;
+import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUSCATION_FILE_TYPE_NATIVE_CODE;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_TYPE_MAIN;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_TYPE_PATCH;
 
@@ -163,6 +164,24 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
                             new FileContent("application/octet-stream", new File(mappingFile.getRemote()));
                     editService.deobfuscationfiles().upload(applicationId, editId, Math.toIntExact(uploadedVersionCode),
                             DEOBFUSCATION_FILE_TYPE_PROGUARD, mapping).execute();
+                }
+            }
+
+            // Upload the native debug symbol file for this file, if there is one
+            final FilePath nativeDebugSymbolFile = appFile.getNativeDebugSymbolFile();
+            if (nativeDebugSymbolFile != null) {
+                final String relativeFileName = getRelativeFileName(nativeDebugSymbolFile);
+
+                // Google Play API doesn't accept empty native debug symbol files
+                logger.println(String.format(" Native debug symbol file size: %s", nativeDebugSymbolFile.length()));
+                if (nativeDebugSymbolFile.length() == 0) {
+                    logger.println(String.format(" Ignoring empty native debug symbol file: %s", relativeFileName));
+                } else {
+                    logger.println(String.format(" Uploading associated native debug symbol file: %s", relativeFileName));
+                    FileContent nativeDebugSymbol =
+                            new FileContent("application/octet-stream", new File(nativeDebugSymbolFile.getRemote()));
+                    editService.deobfuscationfiles().upload(applicationId, editId, Math.toIntExact(uploadedVersionCode),
+                            DEOBFUSCATION_FILE_TYPE_NATIVE_CODE, nativeDebugSymbol).execute();
                 }
             }
             logger.println("");

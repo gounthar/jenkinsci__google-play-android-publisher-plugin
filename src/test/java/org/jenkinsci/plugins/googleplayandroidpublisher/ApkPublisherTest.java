@@ -111,6 +111,7 @@ public class ApkPublisherTest {
         publisher.setGoogleCredentialsId("credential-b");
         publisher.setFilesPattern("**/builds/*.apk, *.aab");
         publisher.setDeobfuscationFilesPattern("**/proguard/*.txt");
+        publisher.setNativeDebugSymbolFilesPattern("**/native/*.zip");
         publisher.setExpansionFilesPattern("${EXP_FILES}");
         publisher.setUsePreviousExpansionFilesIfMissing(true);
         publisher.setTrackName("alpha");

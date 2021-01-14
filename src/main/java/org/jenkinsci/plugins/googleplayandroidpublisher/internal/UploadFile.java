@@ -18,6 +18,7 @@ public class UploadFile implements Serializable {
     private AppFileMetadata metadata;
     private String sha1Hash;
     private FilePath mappingFile;
+    private FilePath nativeDebugSymbolFile;
 
     public UploadFile(FilePath filePath) throws IOException, InterruptedException {
         this.filePath = filePath;
@@ -71,6 +72,14 @@ public class UploadFile implements Serializable {
 
     public void setMappingFile(FilePath file) {
         this.mappingFile = file;
+    }
+
+    public FilePath getNativeDebugSymbolFile() {
+        return nativeDebugSymbolFile;
+    }
+
+    public void setNativeDebugSymbolFile(FilePath file) {
+        this.nativeDebugSymbolFile = file;
     }
 
     private static final class GetHashTask extends MasterToSlaveFileCallable<String> {

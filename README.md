@@ -10,6 +10,7 @@ Enables Jenkins to manage and upload Android app files (AAB or APK) to Google Pl
 - Uploading Android App Bundle (AAB) or APK files to Google Play
   - This includes apps which use Multiple APK support
   - ProGuard `mapping.txt` files can also be associated with each app file, for deobfuscating stacktraces
+  - Native debug symbol `lib.zip` files can also be associated with each app file, for deobfuscating native crash dumps
   - The update priority can also be set, if using [in-app updates][gp-docs-inappupdates]
 -  Uploading APK expansion (.obb) files
    - With the option to re-use expansion files from existing APKs, e.g. for patch releases
@@ -185,6 +186,7 @@ The `androidApkUpload` build step lets you upload Android App Bundle (AAB) or AP
 | rolloutPercentage                  | string  | `'1.5'`                | (none)                                                   | The rollout percentage to set on the track; use 0% to create a draft release                                           |
 | ~rolloutPercent~<br>(deprecated)   | number  | `1.5`                  | (none)                                                   | (deprecated, but still supported; prefer `rolloutPercentage` instead — it takes priority if both are defined)          |
 | deobfuscationFiles<br>Pattern      | string  | `'**/mapping.txt'`     | (none)                                                   | Comma-separated glob patterns or filenames pointing to ProGuard mapping files to associate with the uploaded app files |
+| nativeDebugSymbolFiles<br>Pattern      | string  | `'**/lib.zip'`     | (none)                                                   | Comma-separated glob patterns or filenames pointing to native debug symbol files to associate with the uploaded app files |
 | expansionFilesPattern              | string  | `'**/*.obb'`           | (none)                                                   | Comma-separated glob patterns or filenames pointing to expansion files to associate with the uploaded APK files        |
 | usePreviousExpansion<br>FilesIfMissing | boolean | `false`            | `true`                                                   | Whether to re-use the existing expansion files that have already been uploaded to Google Play for this app, if any expansion files are missing |
 | recentChangeList                   | list    | (see below)            | (empty)                                                  | List of recent change texts to associate with the upload app files                                                     |
@@ -206,6 +208,7 @@ androidApkUpload googleCredentialsId: 'My Google Play account',
                  trackName: 'dogfood',
                  rolloutPercentage: '25',
                  deobfuscationFilesPattern: '**/build/outputs/**/mapping.txt',
+                 nativeDebugSymbolFilesPattern: '**/build/outputs/**/lib.zip',
                  inAppUpdatePriority: '2',
                  recentChangeList: [
                    [language: 'en-GB', text: "Please test the changes from Jenkins build ${env.BUILD_NUMBER}."],

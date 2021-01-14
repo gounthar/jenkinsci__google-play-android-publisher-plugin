@@ -55,6 +55,7 @@ public class ApkPublisher extends GooglePlayPublisher {
 
     private String filesPattern;
     private String deobfuscationFilesPattern;
+    private String nativeDebugSymbolFilesPattern;
     private String expansionFilesPattern;
     private boolean usePreviousExpansionFilesIfMissing;
     private String trackName;
@@ -192,6 +193,15 @@ public class ApkPublisher extends GooglePlayPublisher {
     }
 
     @DataBoundSetter
+    public void setNativeDebugSymbolFilesPattern(String nativeDebugSymbolFilesPattern) {
+        this.nativeDebugSymbolFilesPattern = nativeDebugSymbolFilesPattern;
+    }
+
+    public String getNativeDebugSymbolFilesPattern() {
+        return fixEmptyAndTrim(nativeDebugSymbolFilesPattern);
+    }
+
+    @DataBoundSetter
     public void setExpansionFilesPattern(String expansionFilesPattern) {
         this.expansionFilesPattern = expansionFilesPattern;
     }
@@ -248,6 +258,10 @@ public class ApkPublisher extends GooglePlayPublisher {
 
     private String getExpandedDeobfuscationFilesPattern() throws IOException, InterruptedException {
         return expand(getDeobfuscationFilesPattern());
+    }
+
+    private String getExpandedNativeDebugSymbolFilesPattern() throws IOException, InterruptedException {
+        return expand(getNativeDebugSymbolFilesPattern());
     }
 
     private String getExpandedExpansionFilesPattern() throws IOException, InterruptedException {
@@ -464,6 +478,55 @@ public class ApkPublisher extends GooglePlayPublisher {
                 logger.println(String.format("There are %d AAB/APKs to be uploaded, but only %d obfuscation mapping " +
                         "files were found matching the pattern '%s':",
                         validFiles.size(), relativeMappingPaths.size(), mappingFilesPattern));
+                for (String path : relativePaths) {
+                    logger.println(String.format("- %s", path));
+                }
+                for (String path : relativeMappingPaths) {
+                    logger.println(String.format("- %s", path));
+                }
+                return false;
+            }
+        }
+
+        // Find the native debug symbol filename(s) which match the pattern after variable expansion
+        final String nativeDebugSymbolFilesPattern = getExpandedNativeDebugSymbolFilesPattern();
+        if (getExpandedNativeDebugSymbolFilesPattern() != null) {
+            List<String> relativeMappingPaths = workspace.act(new FindFilesTask(nativeDebugSymbolFilesPattern));
+            if (relativeMappingPaths.isEmpty()) {
+                logger.println(String.format("No native debug symbol files matching the pattern '%s' could be found; " +
+                        "no files will be uploaded", nativeDebugSymbolFilesPattern));
+                return false;
+            }
+
+            // Create a mapping of app files to their obfuscation native debug symbol file
+            if (relativeMappingPaths.size() == 1) {
+                // If there is only one native debug symbol file, associate it with each of the app files
+                FilePath nativeDebugSymbolFile = workspace.child(relativeMappingPaths.get(0));
+                for (UploadFile appFile : validFiles) {
+                    appFile.setNativeDebugSymbolFile(nativeDebugSymbolFile);
+                }
+            } else if (relativeMappingPaths.size() == validFiles.size()) {
+                // If there are multiple native debug symbol files, this usually means that there is one per dimension;
+                // the folder structure will typically look like this for the app files and their native debug symbol files:
+                //
+                // - build/outputs/apk/dimension_one/release/app-release.apk
+                // - build/outputs/apk/dimension_two/release/app-release.apk
+                // - build/outputs/native/dimension_one/release/lib.zip
+                // - build/outputs/native/dimension_two/release/lib.zip
+                //
+                // i.e. an app file and its native debug symbol file don't share the same path prefix, but as the directories are named
+                // by dimension, we assume that the order of the output of both FindFileTasks here will be the same
+                //
+                // We use this assumption here to associate the individual native debug symbol files with the discovered app files
+                for (int i = 0, n = validFiles.size(); i < n; i++) {
+                    FilePath nativeDebugSymbolFile = workspace.child(relativeMappingPaths.get(i));
+                    validFiles.get(i).setNativeDebugSymbolFile(nativeDebugSymbolFile);
+                }
+            } else {
+                // If, for some reason, the number of app files don't match, we won't deal with this situation
+                logger.println(String.format("There are %d AAB/APKs to be uploaded, but only %d native debug" +
+                        "files were found matching the pattern '%s':",
+                        validFiles.size(), relativeMappingPaths.size(), nativeDebugSymbolFilesPattern));
                 for (String path : relativePaths) {
                     logger.println(String.format("- %s", path));
                 }

@@ -15,6 +15,11 @@
     <f:textbox />
   </f:entry>
 
+  <f:entry title="${%Native debug symbol files}" field="nativeDebugSymbolFilesPattern"
+      description="${%Optional, comma-separated list of filenames or patterns}">
+    <f:textbox />
+  </f:entry>
+
   <f:entry title="${%Expansion files}" field="expansionFilesPattern">
     <f:textbox />
     <f:checkbox title="${%Re-use expansion files from existing APKs where necessary}"

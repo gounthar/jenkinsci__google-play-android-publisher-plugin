@@ -8,6 +8,9 @@ public class Constants {
     /** Deobfuscation file type: proguard */
     public static final String DEOBFUSCATION_FILE_TYPE_PROGUARD = "proguard";
 
+    /** Deobfuscation file type: native debugging symbols */
+    public static final String DEOBFUSCATION_FILE_TYPE_NATIVE_CODE = "nativeCode";
+
     /** File name pattern which expansion files must match. */
     static final Pattern OBB_FILE_REGEX =
             Pattern.compile("^(main|patch)\\.([0-9]+)\\.([._a-z0-9]+)\\.obb$", Pattern.CASE_INSENSITIVE);
