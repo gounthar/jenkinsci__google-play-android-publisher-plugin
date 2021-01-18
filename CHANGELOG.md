@@ -1,5 +1,17 @@
 # Version history
 
+## 4.1
+January 18, 2021
+
+### New features ✨
+- Added the ability to upload [native debug symbols files](https://developer.android.com/studio/build/shrink-code#native-crash-support) ([#38](https://github.com/jenkinsci/google-play-android-publisher-plugin/pull/38); thanks to [Brian Wang](https://github.com/wangpy))
+- Added the ability to set the release name ([#39](https://github.com/jenkinsci/google-play-android-publisher-plugin/pull/39); thanks to [Niklas Therning](https://github.com/ntherning))
+
+### Miscellaneous 🦆
+- Updated the list of [possible languages](https://support.google.com/googleplay/android-developer/answer/9844778) for release notes, shown in the auto-complete list
+- Made logging at build time a bit more consistent
+- Updated inline documentation
+
 ## 4.0
 September 27, 2020
 
