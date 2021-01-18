@@ -110,23 +110,23 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
         }
 
         // Upload each of the files
-        logger.println(String.format("Uploading %d file(s) with application ID: %s%n", appFilesToUpload.size(), applicationId));
+        logger.printf("Uploading %d file(s) with application ID: %s%n%n", appFilesToUpload.size(), applicationId);
         final AppFileFormat fileFormat = appFilesToUpload.get(0).getFileFormat();
         final ArrayList<Long> uploadedVersionCodes = new ArrayList<>();
         for (UploadFile appFile : appFilesToUpload) {
             // Log some useful information about the file that will be uploaded
             final String fileType = (fileFormat == AppFileFormat.BUNDLE) ? "AAB" : "APK";
-            logger.println(String.format("      %s file: %s", fileType, getRelativeFileName(appFile.getFilePath())));
-            logger.println(String.format("     File size: %s", humanReadableByteSize(appFile.getFilePath().length())));
-            logger.println(String.format("    SHA-1 hash: %s", appFile.getSha1Hash()));
-            logger.println(String.format("   versionCode: %d", appFile.getVersionCode()));
-            logger.println(String.format("   versionName: %s", appFile.getVersionName()));
-            logger.println(String.format(" minSdkVersion: %s", appFile.getMinSdkVersion()));
+            logger.printf("         %s file: %s%n", fileType, getRelativeFileName(appFile.getFilePath()));
+            logger.printf("        File size: %s%n", humanReadableByteSize(appFile.getFilePath().length()));
+            logger.printf("       SHA-1 hash: %s%n", appFile.getSha1Hash());
+            logger.printf("      versionCode: %d%n", appFile.getVersionCode());
+            logger.printf("      versionName: %s%n", appFile.getVersionName());
+            logger.printf("    minSdkVersion: %s%n", appFile.getMinSdkVersion());
 
             // Check whether this file already exists on the server (i.e. uploading it would fail)
             for (String hash : existingAppFileHashes) {
                 if (hash.toLowerCase(Locale.ROOT).equals(appFile.getSha1Hash())) {
-                    logger.println();
+                    logger.printf(" %n");
                     logger.println("This file already exists in the Google Play account; it cannot be uploaded again");
                     return false;
                 }
@@ -151,40 +151,12 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
 
             // Upload the ProGuard mapping file for this file, if there is one
             final FilePath mappingFile = appFile.getMappingFile();
-            if (mappingFile != null) {
-                final String relativeFileName = getRelativeFileName(mappingFile);
-
-                // Google Play API doesn't accept empty mapping files
-                logger.println(String.format(" Mapping file size: %s", mappingFile.length()));
-                if (mappingFile.length() == 0) {
-                    logger.println(String.format(" Ignoring empty ProGuard mapping file: %s", relativeFileName));
-                } else {
-                    logger.println(String.format(" Uploading associated ProGuard mapping file: %s", relativeFileName));
-                    FileContent mapping =
-                            new FileContent("application/octet-stream", new File(mappingFile.getRemote()));
-                    editService.deobfuscationfiles().upload(applicationId, editId, Math.toIntExact(uploadedVersionCode),
-                            DEOBFUSCATION_FILE_TYPE_PROGUARD, mapping).execute();
-                }
-            }
+            handleMappingFile(uploadedVersionCode, mappingFile, DEOBFUSCATION_FILE_TYPE_PROGUARD, "ProGuard mapping");
 
             // Upload the native debug symbol file for this file, if there is one
-            final FilePath nativeDebugSymbolFile = appFile.getNativeDebugSymbolFile();
-            if (nativeDebugSymbolFile != null) {
-                final String relativeFileName = getRelativeFileName(nativeDebugSymbolFile);
-
-                // Google Play API doesn't accept empty native debug symbol files
-                logger.println(String.format(" Native debug symbol file size: %s", nativeDebugSymbolFile.length()));
-                if (nativeDebugSymbolFile.length() == 0) {
-                    logger.println(String.format(" Ignoring empty native debug symbol file: %s", relativeFileName));
-                } else {
-                    logger.println(String.format(" Uploading associated native debug symbol file: %s", relativeFileName));
-                    FileContent nativeDebugSymbol =
-                            new FileContent("application/octet-stream", new File(nativeDebugSymbolFile.getRemote()));
-                    editService.deobfuscationfiles().upload(applicationId, editId, Math.toIntExact(uploadedVersionCode),
-                            DEOBFUSCATION_FILE_TYPE_NATIVE_CODE, nativeDebugSymbol).execute();
-                }
-            }
-            logger.println("");
+            final FilePath symbolsFile = appFile.getNativeDebugSymbolFile();
+            handleMappingFile(uploadedVersionCode, symbolsFile, DEOBFUSCATION_FILE_TYPE_NATIVE_CODE, "Native symbols");
+            logger.printf(" %n");
         }
 
         // Upload the expansion files, or associate the previous ones, if configured
@@ -194,10 +166,12 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
             } else {
                 logger.println("Ignoring expansion file settings, as we are uploading AAB file(s)");
             }
+            logger.printf(" %n");
         }
 
         if (inAppUpdatePriority != null) {
-            logger.println(String.format("Setting in-app update priority to %d", inAppUpdatePriority));
+            logger.printf("Setting in-app update priority to %d%n", inAppUpdatePriority);
+            logger.printf(" %n");
         }
 
         // Assign all uploaded app files to the configured track
@@ -229,6 +203,25 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
         return true;
     }
 
+    private void handleMappingFile(
+        long versionCode, @Nullable FilePath mappingFile, String mappingFileTypeId, String mappingFileTypeName
+    ) throws IOException, InterruptedException {
+        if (mappingFile == null) {
+            return;
+        }
+
+        // Google Play API doesn't accept empty mapping files
+        final String relativeFileName = getRelativeFileName(mappingFile);
+        if (mappingFile.length() == 0) {
+            logger.printf(" Ignoring empty %s file: %s%n", mappingFileTypeName, relativeFileName);
+        } else {
+            logger.printf(" %16s: %s%n", mappingFileTypeName, relativeFileName);
+            FileContent mapping = new FileContent("application/octet-stream", new File(mappingFile.getRemote()));
+            editService.deobfuscationfiles().upload(applicationId, editId, Math.toIntExact(versionCode),
+                    mappingFileTypeId, mapping).execute();
+        }
+    }
+
     /** Applies the appropriate expansion file to each given APK version. */
     private void handleExpansionFiles(Collection<Long> uploadedVersionCodes) throws IOException {
         // Ensure that the version codes are sorted in ascending order, as this allows us to
@@ -249,7 +242,7 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
             logger.println(String.format("Handling expansion files for versionCode %d", versionCode));
             applyExpansionFile(versionCode, OBB_FILE_TYPE_MAIN, mainFile, usePreviousExpansionFilesIfMissing);
             applyExpansionFile(versionCode, OBB_FILE_TYPE_PATCH, patchFile, usePreviousExpansionFilesIfMissing);
-            logger.println();
+            logger.printf(" %n");
         }
     }
 
