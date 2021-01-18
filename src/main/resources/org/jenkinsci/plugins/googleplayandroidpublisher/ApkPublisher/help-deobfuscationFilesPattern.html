@@ -3,6 +3,12 @@
   files that should be uploaded to Google Play, so that it can automatically
   deobfuscate stacktraces from crash reports.
   <p/>
+  Note that if you build an Android App Bundle (AAB file) with ProGuard enabled,
+  the mapping file should already be embedded in the app bundle (typically as
+  <tt>BUNDLE-METADATA/com.android.tools.build.obfuscation/proguard.map</tt>.<br/>
+  In such cases, you shouldn't use this option since Google Play will reject any
+  attempt to upload a mapping file when the app bundle has one embedded.
+  <p/>
   You can use wildcards like "<tt>**/build/**/mapping.txt</tt>".<br/>
   See <a href='https://ant.apache.org/manual/Types/fileset.html'>
   the 'includes' attribute of Ant's FileSet</a> for the exact format.<br/>
@@ -11,14 +17,14 @@
   The base directory is <a href='ws/'>the build's workspace</a>.
   You can only upload mapping files that are located in your workspace.
   <p/>
-  If there are multiple files being uploaded, and only one
-  <tt>mapping.txt</tt> file is found, then this file will be associated
-  with each of the files being uploaded. If there are multiple
-  <tt>mapping.txt</tt> files, this plugin will make a basic attempt to
-  associate each mapping file with the corresponding AAB/APK file.<br/>
-  Otherwise, if the number of mapping files found is not equal to the
-  number of APKs being uploaded, the build will fail, as this situation
-  is not supported.
+  If there are multiple AAB/APK files being uploaded, and only one mapping file
+  is found in the workspace, then that mapping file will be associated with
+  each of the app files being uploaded. If there are multiple mapping files
+  found, a basic attempt will be made to automatically associate each mapping
+  file with its corresponding app file.<br/>
+  Otherwise, if the number of mapping files found is <em>not</em> equal to the
+  number of app files being uploaded, the build will fail, as this situation is
+  not supported.
   <p/>
   For more information on deobfuscating crash stacktraces, see the
   Google Play documentation:<br/>
