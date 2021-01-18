@@ -12,7 +12,6 @@ import hudson.model.Item;
 import hudson.model.Queue;
 import hudson.model.queue.Tasks;
 import hudson.security.ACL;
-import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 import org.apache.commons.lang.exception.ExceptionUtils;
 
@@ -72,8 +71,8 @@ public class CredentialsHandler {
         } catch (GeneralSecurityException e) {
             if (ExceptionUtils.getRootCause(e) instanceof IOException) {
                 throw new EphemeralCredentialsException("Failed to validate Google Service Account credential " +
-                        "against the Google API servers. Check internet connectivity on the Jenkins server and try " +
-                        "again.", e);
+                        "against the Google API servers. Check internet connectivity on the Jenkins controller and " +
+                        "try again.", e);
             }
             throw new UploadException(e);
         }
