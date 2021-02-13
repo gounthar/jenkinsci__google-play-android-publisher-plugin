@@ -326,7 +326,7 @@ This plugin already recognises some temporary Google Play API server problems an
 If you see this error message, look further down the error log to see what is causing it. Below are a couple of common causes:
 
 #### Invalid JWT: Token must be a short-lived token and in a reasonable timeframe
-Ensure that the time is correctly synchronised on the Jenkins master and build agent, and then try again.
+Ensure that the system time is accurate on both the Jenkins controller and build agent, and then try again.
 
 #### java.net.SocketTimeoutException: connect timed out
 This likely means your build machine is behind an HTTP proxy.
@@ -334,6 +334,13 @@ This likely means your build machine is behind an HTTP proxy.
 In this case, you should set up Jenkins as documented on the [JenkinsBehindProxy][jenkins-behind-proxy] page.
 
 This plugin only makes secure (HTTPS) requests, so you need to make sure that the `-Dhttps.proxyHost=<hostname>` and `-Dhttps.proxyPort=<port>` Java properties are set when starting Jenkins. Add the appropriate http versions of those flags too, if unsecured HTTP requests also need to go through the proxy.
+
+### Internal error encountered
+In some cases, the Google Play API can respond with a very generic error message.
+
+If you see this, double-check all of your app-related settings on Google Play before trying again. For example, make sure you have no outstanding issues in your Google Play [inbox][gp-console-inbox], Policy Status, App Content, pricing and distribution settings, etc..
+
+Please also [contact Google Play Developer Support][gp-support-form] to inform them that the Google Play Developers API is returning an unhelpful error message, and let them know what the cause was, if you manage to resolve the error by updating your Google Play account.
 
 ### Release track was not specified; this is now a mandatory parameter
 Version 4.0 of the plugin made it [mandatory](#version-40) to specify the desired release track name.
@@ -391,6 +398,7 @@ See [CHANGELOG.md][changelog].
 [gp-console]:https://play.google.com/console
 [gp-console-account-details]:https://play.google.com/console/developers/contact-details
 [gp-console-api-access]:https://play.google.com/console/developers/api-access
+[gp-console-inbox]:https://play.google.com/console/developers/inbox
 [gp-docs-distribute]:https://developer.android.com/distribute/best-practices/launch
 [gp-docs-expansions]:https://developer.android.com/google/play/expansion-files.html
 [gp-docs-inappupdatepriority]:https://developer.android.com/guide/playcore/in-app-updates#check-priority
