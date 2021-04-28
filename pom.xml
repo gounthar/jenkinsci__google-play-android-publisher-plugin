@@ -70,7 +70,7 @@
     <dependency>
       <groupId>com.github.orrc</groupId>
       <artifactId>android-bundle-basics-lib</artifactId>
-      <version>v4</version>
+      <version>v5</version>
     </dependency>
 
     <dependency>
