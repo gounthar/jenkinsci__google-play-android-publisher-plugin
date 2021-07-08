@@ -11,6 +11,7 @@ Enables Jenkins to manage and upload Android app files (AAB or APK) to Google Pl
   - This includes apps which use Multiple APK support
   - ProGuard `mapping.txt` and native debug symbols can also be associated with each app file, for deobfuscating crash dumps
   - The update priority can be set, if using [in-app updates][gp-docs-inappupdates]
+  - Include bundles from previous releases
   - APK expansion (.obb) files can also be uploaded
     - With the option to re-use expansion files from existing APKs, e.g. for patch releases
 - Assigning apps to internal, alpha, beta, production, or custom release tracks
@@ -146,6 +147,7 @@ The following job setup process is demonstrated in this video:
    - If nothing is entered, the default value (0, lowest priority) will be set by Google Play
 9. Optionally choose "Add language" to associate release notes with the uploaded file(s)
    - You add entries for as many or as few of your supported language as you wish, but each language must already have been added to your app, under the "Store Listing" section in the Google Play Console.
+10. Optionally specify [bundles to include][gp-docs-bundlestoinclude]
 
 ###### APK expansion files
 You can optionally add up to two [expansion files][gp-docs-expansions] (main + patch) for each APK being uploaded.
@@ -190,6 +192,7 @@ The `androidApkUpload` build step lets you upload Android App Bundle (AAB) or AP
 | usePreviousExpansion<br>FilesIfMissing | boolean | `false`            | `true`                                                   | Whether to re-use the existing expansion files that have already been uploaded to Google Play for this app, if any expansion files are missing |
 | recentChangeList                   | list    | (see below)            | (empty)                                                  | List of recent change texts to associate with the upload app files                                                     |
 | inAppUpdatePriority                | string  | `'1'`                  | `'0'`                                                    | Priority of this release, used by the Google Play Core in-app update feature                                           |
+| bundlesToInclude                   | string  | `'1, 2, 3'`            | (empty)                                                  | Include bundles from previous releases, used to publish Wearable variants of your app                                  |
 
 The `googlePlayCredentialsId`, `trackName`, and `rolloutPercentage` parameters are mandatory, e.g. a minimal configuration would be:
 ```groovy

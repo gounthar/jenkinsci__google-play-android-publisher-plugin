@@ -741,6 +741,62 @@ public class ApkPublisherTest {
         );
     }
 
+    @Test
+    public void uploadingApkWithPipelineWithIncludeBundlesSucceeds() throws Exception{
+        // Given a step with in-app update priority
+        String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
+                "  trackName: 'production',\n"+
+                "  rolloutPercentage: '100',\n"+
+                "  bundlesToInclude: '1'";
+
+        uploadApkWithPipelineAndAssertSuccess(stepDefinition,
+                "Adding 1 bundle(s) to include");
+    }
+
+    @Test
+    public void uploadingApkWithPipelineWithIncludeBundlesFails() throws Exception{
+        // Given a step with in-app update priority
+        // But whose value is not a valid integer
+        String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
+                "  trackName: 'production',\n"+
+                "  rolloutPercentage: '100',\n"+
+                "  bundlesToInclude: 'fake'";
+
+        // When a build occurs, it should roll out to that percentage
+        uploadApkWithPipelineAndAssertFailure(
+                stepDefinition,
+                "Use bundlesToInclude: '1,2,3'"
+        );
+    }
+
+    @Test
+    public void uploadingApkWithPipelineWithMultipleIncludeBundlesSucceeds() throws Exception{
+        // Given a step with in-app update priority
+        String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
+                "  trackName: 'production',\n"+
+                "  rolloutPercentage: '100',\n"+
+                "  bundlesToInclude: '1, 2, 3, 4'";
+
+        uploadApkWithPipelineAndAssertSuccess(stepDefinition,
+                "Adding 4 bundle(s) to include");
+    }
+
+    @Test
+    public void uploadingApkWithPipelineWithMultipleIncludeBundlesFails() throws Exception{
+        // Given a step with in-app update priority
+        // But whose value is not a valid integer
+        String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
+                "  trackName: 'production',\n"+
+                "  rolloutPercentage: '100',\n"+
+                "  bundlesToInclude: '1,2,3,fake,5'";
+
+        // When a build occurs, it should roll out to that percentage
+        uploadApkWithPipelineAndAssertFailure(
+                stepDefinition,
+                "Use bundlesToInclude: '1,2,3'"
+        );
+    }
+
     private void uploadApkWithPipelineAndAssertFailure(
         String stepDefinition, String... expectedLogLines
     ) throws Exception {

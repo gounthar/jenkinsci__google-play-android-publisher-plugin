@@ -64,6 +64,7 @@ public class ApkPublisher extends GooglePlayPublisher {
     private String rolloutPercentage;
     private RecentChanges[] recentChangeList;
     private String inAppUpdatePriority;
+    private String bundlesToInclude;
 
     // This field was used before AAB support was introduced; it will be migrated to `filesPattern` for Freestyle jobs
     @Deprecated private transient String apkFilesPattern;
@@ -173,6 +174,12 @@ public class ApkPublisher extends GooglePlayPublisher {
     public String getTrackName() {
         return fixEmptyAndTrim(trackName);
     }
+
+    @DataBoundSetter
+    public void setBundlesToInclude(String bundlesToInclude) { this.bundlesToInclude = bundlesToInclude; }
+
+    @Nullable
+    public String getBundlesToInclude(){ return bundlesToInclude; }
 
     @DataBoundSetter
     public void setReleaseName(String releaseName) {
@@ -296,6 +303,21 @@ public class ApkPublisher extends GooglePlayPublisher {
         return expanded;
     }
 
+    private List<Long> getExpandedBundlesToInclude() throws IOException, InterruptedException {
+        if(bundlesToInclude == null || bundlesToInclude.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Long> versionCodeList = new ArrayList<>();
+        String codes = bundlesToInclude;
+        for (String s : codes.split("[,\\s]+")) {
+            long versionCode = tryParseNumber(s.trim(), -1).longValue();
+            versionCodeList.add(versionCode);
+        }
+
+        return versionCodeList;
+    }
+
     private String getExpandedInAppUpdatePriorityString() throws IOException, InterruptedException {
         return expand(getInAppUpdatePriority());
     }
@@ -339,6 +361,12 @@ public class ApkPublisher extends GooglePlayPublisher {
         // Check whether in-app priority could be parsed to a number
         if (getExpandedInAppUpdatePriorityString() != null && getExpandedInAppUpdatePriority() == null) {
             errors.add(String.format("'%s' is not a valid update priority", getExpandedInAppUpdatePriorityString()));
+        }
+
+        // Check whether all bundle to include are valid
+        List<Long> bundlesToInclude = getExpandedBundlesToInclude();
+        if(!bundlesToInclude.isEmpty() && bundlesToInclude.contains(-1L)){
+            errors.add(String.format("Use bundlesToInclude: '1,2,3'"));
         }
 
         // Print accumulated errors
@@ -525,7 +553,7 @@ public class ApkPublisher extends GooglePlayPublisher {
             GoogleRobotCredentials credentials = getCredentialsHandler().getServiceAccountCredentials(run.getParent());
             return workspace.act(new ApkUploadTask(listener, credentials, applicationId, workspace, validFiles,
                     expansionFiles, usePreviousExpansionFilesIfMissing, getCanonicalTrackName(), getExpandedReleaseName(),
-                    getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority()));
+                    getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority(), getExpandedBundlesToInclude()));
         } catch (UploadException e) {
             logger.println(String.format("Upload failed: %s", getPublisherErrorMessage(e)));
             logger.println("No changes have been applied to the Google Play account");

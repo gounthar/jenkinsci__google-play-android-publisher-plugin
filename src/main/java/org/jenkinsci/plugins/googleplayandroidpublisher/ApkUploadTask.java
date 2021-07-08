@@ -45,6 +45,7 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
     private final Map<Long, ExpansionFileSet> expansionFiles;
     private final boolean usePreviousExpansionFilesIfMissing;
     private final RecentChanges[] recentChangeList;
+    private final List<Long> bundlesToInclude;
     private final List<Long> existingVersionCodes;
     private long latestMainExpansionFileVersionCode;
     private long latestPatchExpansionFileVersionCode;
@@ -53,13 +54,14 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
     ApkUploadTask(TaskListener listener, GoogleRobotCredentials credentials, String applicationId,
                   FilePath workspace, List<UploadFile> appFilesToUpload, Map<Long, ExpansionFileSet> expansionFiles,
                   boolean usePreviousExpansionFilesIfMissing, String trackName, String releaseName, double rolloutPercentage,
-                  ApkPublisher.RecentChanges[] recentChangeList, Integer inAppUpdatePriority) {
+                  ApkPublisher.RecentChanges[] recentChangeList, Integer inAppUpdatePriority, List<Long> bundlesToInclude) {
         super(listener, credentials, applicationId, trackName, releaseName, rolloutPercentage, inAppUpdatePriority);
         this.workspace = workspace;
         this.appFilesToUpload = appFilesToUpload;
         this.expansionFiles = expansionFiles;
         this.usePreviousExpansionFilesIfMissing = usePreviousExpansionFilesIfMissing;
         this.recentChangeList = recentChangeList;
+        this.bundlesToInclude = bundlesToInclude;
         this.existingVersionCodes = new ArrayList<>();
     }
 
@@ -172,6 +174,13 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
         if (inAppUpdatePriority != null) {
             logger.printf("Setting in-app update priority to %d%n", inAppUpdatePriority);
             logger.printf(" %n");
+        }
+
+        // Bundles to include from previous releases. Can be used to update Wearable bundles separately
+        if(!bundlesToInclude.isEmpty()) {
+            logger.printf("Adding %d bundle(s) to include %n", bundlesToInclude.size());
+            logger.printf(" %n");
+            uploadedVersionCodes.addAll(bundlesToInclude);
         }
 
         // Assign all uploaded app files to the configured track
