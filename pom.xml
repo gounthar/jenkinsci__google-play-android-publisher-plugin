@@ -9,7 +9,7 @@
   </parent>
 
   <properties>
-    <jenkins.version>2.289.2</jenkins.version>
+    <jenkins.version>2.164.3</jenkins.version>
     <jenkins.bom.artifactId>2.164.x</jenkins.bom.artifactId>
     <jenkins.bom.version>9</jenkins.bom.version>
     <java.level>8</java.level>
