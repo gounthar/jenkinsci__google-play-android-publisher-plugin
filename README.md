@@ -160,6 +160,11 @@ Similarly, if you want to apply the same expansion file(s) to multiple APKs bein
 
 See the inline help for more details.
 
+###### Bundles to Include
+You can optionally add [bundles to include][gp-docs-bundlestoinclude] for each upload.
+
+A comma seperated list of versionCodes needs to be specified to include/retain. After publishing, these retained bundles will stay published as well.
+
 ##### Moving existing app versions to another release track
 If you have already uploaded an app to the alpha track (for example), you can later use Jenkins to re-assign that version to the beta or production release track.
 
@@ -225,6 +230,13 @@ androidApkUpload googleCredentialsId: 'My Google Play account',
                  filesPattern: '**/*.apk',
                  expansionFilesPattern: '**/patch.obb',
                  usePreviousExpansionFilesIfMissing: true
+```
+
+To include/retain bundles from a previous:
+```
+androidApkUpload googleCredentialsId: 'My Google Play account',
+                 filesPattern: '**/*.aab',
+                 bundlesToInclude: '1,2'
 ```
 
 ##### Updating release tracks with existing app versions
@@ -407,6 +419,7 @@ See [CHANGELOG.md][changelog].
 [gp-docs-inappupdatepriority]:https://developer.android.com/guide/playcore/in-app-updates#check-priority
 [gp-docs-inappupdates]:https://developer.android.com/guide/playcore/in-app-updates
 [gp-docs-rollout]:https://support.google.com/googleplay/android-developer/answer/6346149
+[gp-docs-bundlestoinclude]:https://support.google.com/googleplay/android-developer/answer/9859348?hl=en#zippy=%2Cincluded-app-bundles-and-apks
 [gp-support-form]:https://support.google.com/googleplay/android-developer/contact/publishing?extra.IssueType=submitting&hl=en&ec=publish&cfsi=publish_cf&cfnti=escalationflow.email&cft=3&rd=1
 [issues-existing]:https://issues.jenkins-ci.org/issues/?jql=project%20%3D%20JENKINS%20AND%20component%20%3D%20google-play-android-publisher-plugin%20AND%20status%20NOT%20IN(Closed%2C%20Resolved)%20ORDER%20BY%20updated%20DESC
 [issues-report]:https://jenkins.io/redirect/report-an-issue

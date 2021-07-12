@@ -303,7 +303,8 @@ public class ApkPublisher extends GooglePlayPublisher {
         return expanded;
     }
 
-    private List<Long> getExpandedBundlesToInclude() throws IOException, InterruptedException {
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
+    private List<Long> getExpandedBundlesToInclude() {
         if(bundlesToInclude == null || bundlesToInclude.isEmpty()) {
             return new ArrayList<>();
         }

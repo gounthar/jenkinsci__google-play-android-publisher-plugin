@@ -47,4 +47,8 @@
     <f:repeatableProperty field="recentChangeList" add="${%Add language...}" minimum="0" />
   </f:entry>
 
+  <f:entry title="${%Bundles to Include}" field="bundlesToInclude">
+    <f:repeatableProperty field="bundlesToInclude" add="${%Add versionCode...}" minimum="0" />
+  </f:entry>
+
 </j:jelly>
