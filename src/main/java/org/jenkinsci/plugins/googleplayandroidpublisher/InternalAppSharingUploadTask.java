@@ -24,7 +24,7 @@ public class InternalAppSharingUploadTask extends AbstractPublisherTask<Boolean>
         TaskListener listener, GoogleRobotCredentials credentials,
         String applicationId, FilePath workspace, UploadFile appFile
     ) {
-        super(listener, credentials);
+        super(listener, credentials, applicationId);
         this.applicationId = applicationId;
         this.workspace = workspace;
         this.appFile = appFile;
