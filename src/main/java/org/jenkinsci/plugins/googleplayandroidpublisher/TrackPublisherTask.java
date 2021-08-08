@@ -17,7 +17,6 @@ import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.PERCENT
 
 abstract class TrackPublisherTask<V> extends AbstractPublisherTask<V> {
 
-    protected final String applicationId;
     protected String trackName;
     protected final String releaseName;
     protected final double rolloutFraction;
@@ -25,8 +24,7 @@ abstract class TrackPublisherTask<V> extends AbstractPublisherTask<V> {
 
     TrackPublisherTask(TaskListener listener, GoogleRobotCredentials credentials, String applicationId,
                        String trackName, String releaseName, double rolloutPercentage, Integer inAppUpdatePriority) {
-        super(listener, credentials);
-        this.applicationId = applicationId;
+        super(listener, credentials, applicationId);
         this.trackName = trackName;
         this.releaseName = releaseName;
         this.rolloutFraction = rolloutPercentage / 100d;

@@ -616,7 +616,7 @@ public class ReleaseTrackAssignmentBuilderTest {
                         new FakeListBundlesResponse().setEmptyBundles())
                 .withResponse("/edits/the-edit-id/tracks/production",
                         new FakeAssignTrackResponse().success("production", 42))
-                .withResponse("/edits/the-edit-id:commit",
+                .withResponse("/edits/the-edit-id:commit?changesNotSentForReview=false",
                         new FakeCommitResponse().success())
         ;
 
@@ -665,7 +665,7 @@ public class ReleaseTrackAssignmentBuilderTest {
                     ))
             .withResponse("/edits/the-edit-id/tracks/" + trackName,
                     new FakeAssignTrackResponse().success(trackName, 42))
-            .withResponse("/edits/the-edit-id:commit",
+            .withResponse("/edits/the-edit-id:commit?changesNotSentForReview=false",
                     new FakeCommitResponse().success())
         ;
     }

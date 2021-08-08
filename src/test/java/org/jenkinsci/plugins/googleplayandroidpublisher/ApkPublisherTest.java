@@ -989,7 +989,7 @@ public class ApkPublisherTest {
                         new FakePutApkResponse().success(42, "the:sha"))
                 .withResponse("/edits/the-edit-id/tracks/" + trackName,
                         new FakeAssignTrackResponse().success(trackName, 42))
-                .withResponse("/edits/the-edit-id:commit",
+                .withResponse("/edits/the-edit-id:commit?changesNotSentForReview=false",
                         new FakeCommitResponse().success())
         ;
     }
@@ -1022,7 +1022,7 @@ public class ApkPublisherTest {
                         new FakePutBundleResponse().success(43, "the:sha"))
                 .withResponse("/edits/the-edit-id/tracks/production",
                         new FakeAssignTrackResponse().success("production", 43))
-                .withResponse("/edits/the-edit-id:commit",
+                .withResponse("/edits/the-edit-id:commit?changesNotSentForReview=false",
                         new FakeCommitResponse().success())
         ;
     }
