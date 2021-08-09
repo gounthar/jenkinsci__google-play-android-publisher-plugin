@@ -18,6 +18,7 @@ import org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestHttpTranspo
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestUtilImpl;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeAssignTrackResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeCommitResponse;
+import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeHttpResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeListApksResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeListBundlesResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeListTracksResponse;
@@ -457,6 +458,28 @@ public class ApkPublisherTest {
     }
 
     @Test
+    public void uploadingApkWithReviewWarningSucceeds() throws Exception {
+        // Given a job, whose publisher has a credential, track name, and rollout percentage, but no other configuration
+        FreeStyleProject p = j.createFreeStyleProject();
+        ApkPublisher publisher = new ApkPublisher();
+        publisher.setGoogleCredentialsId("test-credentials");
+        publisher.setTrackName("production");
+        publisher.setRolloutPercentage("100");
+        p.getPublishersList().add(publisher);
+
+        // And the prerequisites are in place, but automated review submission will be rejected
+        setUpCredentials("test-credentials");
+        setUpTransportForApk("production", true, false);
+        setUpApkFile(p);
+
+        // When a build occurs, it should succeed, and indicate that it needs to be manually submitted for review
+        assertResultWithLogLines(j, p, Result.SUCCESS,
+            "Changes were successfully applied to Google Play",
+            "- However, it has indicated that these changes need to be manually submitted for review"
+        );
+    }
+
+    @Test
     public void uploadingApkWithPipelineWithoutTrackNameFails() throws Exception {
         // Given a Pipeline where the track name is not provided
         String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials'";
@@ -537,7 +560,7 @@ public class ApkPublisherTest {
         // And the prerequisites are in place
         // But the initial 'tracks' response won't include the track, as it doesn't yet have any releases
         setUpCredentials("test-credentials");
-        setUpTransportForApk("dogfood", false);
+        setUpTransportForApk("dogfood", false, true);
         setUpApkFile(p);
 
         // When a build occurs
@@ -901,7 +924,7 @@ public class ApkPublisherTest {
     @WithoutJenkins
     public void responsesCanBeSerialized() throws IOException, ClassNotFoundException {
         transport.withResponse("/edits",
-                new FakePostEditsResponse().setError(400, "error"));
+                new FakePostEditsResponse().setError(400, "error msg"));
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -921,7 +944,7 @@ public class ApkPublisherTest {
         TestHttpTransport.SimpleResponse response = deserializedTransport.responses.get("/edits");
         assertNotNull(response);
         assertThat(response.statusCode, equalTo(400));
-        assertEquals(response.jsonContent, "{\"error\": \"error\"}");
+        assertEquals(response.jsonContent, "{\"error\":{\"code\":400,\"message\":\"error msg\"}}");
     }
 
     @Test
@@ -960,10 +983,10 @@ public class ApkPublisherTest {
     }
 
     private void setUpTransportForApk(String trackName) {
-        setUpTransportForApk(trackName, true);
+        setUpTransportForApk(trackName, true, true);
     }
 
-    private void setUpTransportForApk(String trackName, boolean includeTrackInList) {
+    private void setUpTransportForApk(String trackName, boolean includeTrackInList, boolean allowReviewSubmission) {
         transport
                 .withResponse("/edits",
                         new FakePostEditsResponse().setEditId("the-edit-id"))
@@ -989,9 +1012,19 @@ public class ApkPublisherTest {
                         new FakePutApkResponse().success(42, "the:sha"))
                 .withResponse("/edits/the-edit-id/tracks/" + trackName,
                         new FakeAssignTrackResponse().success(trackName, 42))
-                .withResponse("/edits/the-edit-id:commit?changesNotSentForReview=false",
-                        new FakeCommitResponse().success())
         ;
+        if (allowReviewSubmission) {
+            transport.withResponse("/edits/the-edit-id:commit?changesNotSentForReview=false",
+                    new FakeCommitResponse().success());
+        } else {
+            transport
+                    .withResponse("/edits/the-edit-id:commit?changesNotSentForReview=false",
+                        FakeHttpResponse.forError(400, "Changes cannot be sent for review automatically. " +
+                                "Please set the query parameter changesNotSentForReview to true. Once committed, the " +
+                                "changes in this edit can be sent for review from the Google Play Console UI."))
+                    .withResponse("/edits/the-edit-id:commit?changesNotSentForReview=true",
+                            new FakeCommitResponse().success());
+        }
     }
 
     private void setUpTransportForBundle() {
