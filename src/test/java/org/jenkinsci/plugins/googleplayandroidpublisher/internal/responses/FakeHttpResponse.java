@@ -4,12 +4,13 @@ import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.Json;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
+import org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestUtilImpl;
+
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nullable;
-import org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestUtilImpl;
 
 @SuppressWarnings("unchecked")
 public class FakeHttpResponse<T extends FakeHttpResponse<? extends T>>
@@ -56,7 +57,7 @@ public class FakeHttpResponse<T extends FakeHttpResponse<? extends T>>
 
     public T setError(int code, String error) {
         setStatusCode(code);
-        setContent("{\"error\": \"" + error + "\"}");
+        setContent(String.format("{\"error\":{\"code\":%d,\"message\":\"%s\"}}", code, error));
         return (T) this;
     }
 
