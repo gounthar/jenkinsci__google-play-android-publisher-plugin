@@ -44,19 +44,29 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>apache-httpcomponents-client-4-api</artifactId>
-      <version>4.5.13-1.0</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>jackson2-api</artifactId>
-      <version>2.12.3</version>
     </dependency>
 
     <!-- Official bindings for the Android Publisher API -->
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-androidpublisher</artifactId>
+      <!-- Note that the last part of the version string corresponds to the compatible google-api-client version -->
       <version>v3-rev20210728-1.32.1</version>
+      <!-- We can avoid bundling these as they're provided by google-oauth-plugin -->
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.api-client</groupId>
+          <artifactId>google-api-client</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.http-client</groupId>
+          <artifactId>google-http-client</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- To parse the APK file format -->
@@ -76,7 +86,8 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>google-oauth-plugin</artifactId>
-      <version>1.0.0</version>
+      <!-- Awaiting https://github.com/jenkinsci/google-oauth-plugin/pull/129 -->
+      <version>1.0.7-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -90,23 +101,32 @@
       <artifactId>structs</artifactId>
     </dependency>
 
-    <!-- Pinning these versions as various other dependencies rely on them -->
+    <!--
+      Use a newer version of Guava, since google-http-client needs at least v14, rather than v11 bundled with Jenkins.
+      However, this usage should be masked from other consumers via the maven-hpi-plugin configuration below.
+      The exact version being used is defined by the com.google.cloud:libraries-bom
+    -->
     <dependency>
-      <groupId>com.google.http-client</groupId>
-      <artifactId>google-http-client</artifactId>
-      <version>1.39.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.protobuf</groupId>
-      <artifactId>protobuf-java</artifactId>
-      <version>3.12.0</version>
-    </dependency>
-
-    <!-- Upgrade Guava, since google-http-client requires at least v15, rather than the v11 bundled with Jenkins -->
-    <dependency> <!-- see maskClasses config -->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>30.1.1-jre</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.errorprone</groupId>
+          <artifactId>error_prone_annotations</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.j2objc</groupId>
+          <artifactId>j2objc-annotations</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.checkerframework</groupId>
+          <artifactId>checker-compat-qual</artifactId>
+        </exclusion>
+     </exclusions>
     </dependency>
 
     <!-- Testing -->
@@ -182,6 +202,14 @@
         <version>${jenkins.bom.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <!-- Ensures Google lib version compatibility: https://googleapis.github.io/google-http-java-client/setup.html -->
+      <dependency>
+        <groupId>com.google.cloud</groupId>
+        <artifactId>libraries-bom</artifactId>
+        <version>20.9.0</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
