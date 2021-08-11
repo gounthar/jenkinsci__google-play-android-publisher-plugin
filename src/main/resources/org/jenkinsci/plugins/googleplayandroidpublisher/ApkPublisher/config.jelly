@@ -26,6 +26,11 @@
         field="usePreviousExpansionFilesIfMissing" />
   </f:entry>
 
+  <f:entry title="${%Additional versions to include}" field="bundlesToInclude"
+      description="${%Optional, comma-separated list of version codes}">
+    <f:textbox />
+  </f:entry>
+
   <f:entry title="${%Release track}" field="trackName">
     <f:combobox style="width:15em" />
   </f:entry>
@@ -45,10 +50,6 @@
 
   <f:entry title="${%Recent changes}" field="recentChangeList">
     <f:repeatableProperty field="recentChangeList" add="${%Add language...}" minimum="0" />
-  </f:entry>
-
-  <f:entry title="${%Bundles to Include}" field="bundlesToInclude">
-    <f:repeatableProperty field="bundlesToInclude" add="${%Add versionCode...}" minimum="0" />
   </f:entry>
 
 </j:jelly>
