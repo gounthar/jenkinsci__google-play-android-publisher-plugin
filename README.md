@@ -7,13 +7,13 @@
 Enables Jenkins to manage and upload Android app files (AAB or APK) to Google Play.
 
 ## Features
-- Uploading Android App Bundle (AAB) or APK files to Google Play
+- Uploading Android App Bundle (AAB) or APK files to a release track on Google Play
   - This includes apps which use Multiple APK support
   - ProGuard `mapping.txt` and native debug symbols can also be associated with each app file, for deobfuscating crash dumps
-  - The update priority can be set, if using [in-app updates][gp-docs-inappupdates]
-  - Include bundles from previous releases
   - APK expansion (.obb) files can also be uploaded
     - With the option to re-use expansion files from existing APKs, e.g. for patch releases
+  - App files from previous releases can be included when creating a release
+  - The update priority can be set, if using [in-app updates][gp-docs-inappupdates]
 - Assigning apps to internal, alpha, beta, production, or custom release tracks
   - This includes a build step for moving existing versions to a different track, or updating the rollout percentage   
     e.g. You can upload an alpha in one job, then later have another job promote it to beta
@@ -124,7 +124,7 @@ Once you've set up a job (see the next section) and confirmed that uploading wor
 
 ### Per-job configuration
 #### Freestyle job configuration
-##### Uploading app bundles or APKs
+##### Creating a release by uploading app bundles or APKs
 The following job setup process is demonstrated in this video:
 [https://www.youtube.com/watch?v=iu-bLY9-jkc][demo-video-job]
 
@@ -143,11 +143,8 @@ The following job setup process is demonstrated in this video:
 7. Specify a [rollout percentage][gp-docs-rollout] between 0 and 100%
    - If 100% is entered, the app will be immediately rolled out to all users on the chosen release track
    - If 0% is entered, the given file(s) will be uploaded as a draft release, leaving any existing rollout unaffected
-8. Optionally specify an [in-app update priority][gp-docs-inappupdatepriority]
-   - If nothing is entered, the default value (0, lowest priority) will be set by Google Play
-9. Optionally choose "Add language" to associate release notes with the uploaded file(s)
-   - You add entries for as many or as few of your supported language as you wish, but each language must already have been added to your app, under the "Store Listing" section in the Google Play Console.
-10. Optionally specify [bundles to include][gp-docs-bundlestoinclude]
+8. Optionally choose "Add language" to associate release notes with the uploaded file(s)
+    - You add entries for as many or as few of your supported language as you wish, but each language must already have been added to your app, under the "Store Listing" section in the Google Play Console.
 
 ###### APK expansion files
 You can optionally add up to two [expansion files][gp-docs-expansions] (main + patch) for each APK being uploaded.
@@ -160,10 +157,12 @@ Similarly, if you want to apply the same expansion file(s) to multiple APKs bein
 
 See the inline help for more details.
 
-###### Bundles to Include
-You can optionally add [bundles to include][gp-docs-bundlestoinclude] for each upload.
+###### Retaining existing version codes for new releases
+You can optionally retain app files from a previous release in the release that will be created by this build step.
 
-A comma seperated list of versionCodes needs to be specified to include/retain. After publishing, these retained bundles will stay published as well.
+For example, if you have a Wear OS app file already released, but during a build you only need to upload new mobile app files, you can enter the version code of the Wear OS app file to retain it for this new release, rather than having to upload it again here.
+
+Any version codes entered in the "Additional app files to include" field will be assigned to the specified release track along with the uploaded app files.
 
 ##### Moving existing app versions to another release track
 If you have already uploaded an app to the alpha track (for example), you can later use Jenkins to re-assign that version to the beta or production release track.
@@ -180,7 +179,7 @@ You can generate the required Pipeline syntax via the [Snippet Generator][snippe
 
 Note that you should avoid using multiple instances of these steps in a `parallel` block, as the Google Play API only allows one concurrent "edit session" to be open at a time.
 
-##### Uploading app bundles or APKs
+##### Creating a release by uploading app bundles or APKs
 The `androidApkUpload` build step lets you upload Android App Bundle (AAB) or APK files.
 
 | Parameter                          | Type    | Example                | Default                                                  | Description                                                                                                            |
@@ -195,9 +194,9 @@ The `androidApkUpload` build step lets you upload Android App Bundle (AAB) or AP
 | nativeDebugSymbolFiles<br>Pattern  | string  | `'**/symbols.zip'`     | (none)                                                   | Comma-separated glob patterns or filenames pointing to native debug symbol files to associate with the uploaded app files |
 | expansionFilesPattern              | string  | `'**/*.obb'`           | (none)                                                   | Comma-separated glob patterns or filenames pointing to expansion files to associate with the uploaded APK files        |
 | usePreviousExpansion<br>FilesIfMissing | boolean | `false`            | `true`                                                   | Whether to re-use the existing expansion files that have already been uploaded to Google Play for this app, if any expansion files are missing |
-| recentChangeList                   | list    | (see below)            | (empty)                                                  | List of recent change texts to associate with the upload app files                                                     |
+| additionalVersionCodes             | string  | `'101, 102'`           | (none)                                                   | Version codes of existing app files which should be included in the new release being created                          |
 | inAppUpdatePriority                | string  | `'1'`                  | `'0'`                                                    | Priority of this release, used by the Google Play Core in-app update feature                                           |
-| bundlesToInclude                   | string  | `'101, 102'`           | (none)                                                   | Version codes of existing app files which should be included in the new release being created                          |
+| recentChangeList                   | list    | (see below)            | (empty)                                                  | List of recent change texts to associate with the upload app files                                                     |
 
 The `googlePlayCredentialsId`, `trackName`, and `rolloutPercentage` parameters are mandatory, e.g. a minimal configuration would be:
 ```groovy
@@ -217,6 +216,7 @@ androidApkUpload googleCredentialsId: 'My Google Play account',
                  releaseName: 'Test build ({versionCode})',
                  deobfuscationFilesPattern: '**/build/outputs/**/mapping.txt',
                  nativeDebugSymbolFilesPattern: '**/build/outputs/**/native-debug-symbols.zip',
+                 additionalVersionCodes: '101, 102',
                  inAppUpdatePriority: '2',
                  recentChangeList: [
                    [language: 'en-GB', text: "Please test the changes from Jenkins build ${env.BUILD_NUMBER}."],
@@ -230,13 +230,6 @@ androidApkUpload googleCredentialsId: 'My Google Play account',
                  filesPattern: '**/*.apk',
                  expansionFilesPattern: '**/patch.obb',
                  usePreviousExpansionFilesIfMissing: true
-```
-
-To include/retain bundles from a previous:
-```
-androidApkUpload googleCredentialsId: 'My Google Play account',
-                 filesPattern: '**/*.aab',
-                 bundlesToInclude: '1,2'
 ```
 
 ##### Updating release tracks with existing app versions
@@ -419,7 +412,6 @@ See [CHANGELOG.md][changelog].
 [gp-docs-inappupdatepriority]:https://developer.android.com/guide/playcore/in-app-updates#check-priority
 [gp-docs-inappupdates]:https://developer.android.com/guide/playcore/in-app-updates
 [gp-docs-rollout]:https://support.google.com/googleplay/android-developer/answer/6346149
-[gp-docs-bundlestoinclude]:https://support.google.com/googleplay/android-developer/answer/9859348?hl=en#zippy=%2Cincluded-app-bundles-and-apks
 [gp-support-form]:https://support.google.com/googleplay/android-developer/contact/publishing?extra.IssueType=submitting&hl=en&ec=publish&cfsi=publish_cf&cfnti=escalationflow.email&cft=3&rd=1
 [issues-existing]:https://issues.jenkins-ci.org/issues/?jql=project%20%3D%20JENKINS%20AND%20component%20%3D%20google-play-android-publisher-plugin%20AND%20status%20NOT%20IN(Closed%2C%20Resolved)%20ORDER%20BY%20updated%20DESC
 [issues-report]:https://jenkins.io/redirect/report-an-issue

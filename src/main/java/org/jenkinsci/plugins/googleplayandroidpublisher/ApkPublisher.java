@@ -65,7 +65,7 @@ public class ApkPublisher extends GooglePlayPublisher {
     private String rolloutPercentage;
     private RecentChanges[] recentChangeList;
     private String inAppUpdatePriority;
-    private String bundlesToInclude;
+    private String additionalVersionCodes;
 
     // This field was used before AAB support was introduced; it will be migrated to `filesPattern` for Freestyle jobs
     @Deprecated private transient String apkFilesPattern;
@@ -177,13 +177,13 @@ public class ApkPublisher extends GooglePlayPublisher {
     }
 
     @DataBoundSetter
-    public void setBundlesToInclude(String bundlesToInclude) {
-        this.bundlesToInclude = bundlesToInclude;
+    public void setAdditionalVersionCodes(String additionalVersionCodes) {
+        this.additionalVersionCodes = additionalVersionCodes;
     }
 
     @Nullable
-    public String getBundlesToInclude() {
-        return fixEmptyAndTrim(bundlesToInclude);
+    public String getAdditionalVersionCodes() {
+        return fixEmptyAndTrim(additionalVersionCodes);
     }
 
     @DataBoundSetter
@@ -309,13 +309,13 @@ public class ApkPublisher extends GooglePlayPublisher {
     }
 
     @Nullable
-    private String getExpandedBundlesToIncludeString() throws IOException, InterruptedException {
-        return expand(getBundlesToInclude());
+    private String getExpandedAdditionalVersionCodesString() throws IOException, InterruptedException {
+        return expand(getAdditionalVersionCodes());
     }
 
     @Nonnull
-    private List<Long> getExpandedBundlesToInclude() throws IOException, InterruptedException {
-        String versionCodesStr = getExpandedBundlesToIncludeString();
+    private List<Long> getExpandedAdditionalVersionCodes() throws IOException, InterruptedException {
+        String versionCodesStr = getExpandedAdditionalVersionCodesString();
         if (versionCodesStr == null) {
             return Collections.emptyList();
         }
@@ -374,10 +374,10 @@ public class ApkPublisher extends GooglePlayPublisher {
         }
 
         // Check whether all additional version codes are valid
-        List<Long> bundlesToInclude = getExpandedBundlesToInclude();
-        if (!bundlesToInclude.isEmpty() && bundlesToInclude.contains(null)) {
+        List<Long> additionalVersionCodes = getExpandedAdditionalVersionCodes();
+        if (!additionalVersionCodes.isEmpty() && additionalVersionCodes.contains(null)) {
             errors.add(String.format("Additional app files to include contains non-numeric values: '%s'",
-                    getExpandedBundlesToIncludeString()));
+                    getExpandedAdditionalVersionCodesString()));
         }
 
         // Print accumulated errors
@@ -565,7 +565,7 @@ public class ApkPublisher extends GooglePlayPublisher {
             return workspace.act(new ApkUploadTask(listener, credentials, applicationId, workspace, validFiles,
                     expansionFiles, usePreviousExpansionFilesIfMissing, getCanonicalTrackName(), getExpandedReleaseName(),
                     getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority(),
-                    getExpandedBundlesToInclude()));
+                    getExpandedAdditionalVersionCodes()));
         } catch (UploadException e) {
             logger.println(String.format("Upload failed: %s", getPublisherErrorMessage(e)));
             logger.println("No changes have been applied to the Google Play account");

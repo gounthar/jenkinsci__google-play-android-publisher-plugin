@@ -46,7 +46,7 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
     private final Map<Long, ExpansionFileSet> expansionFiles;
     private final boolean usePreviousExpansionFilesIfMissing;
     private final RecentChanges[] recentChangeList;
-    private final List<Long> bundlesToInclude;
+    private final List<Long> additionalVersionCodes;
     private final List<Long> existingVersionCodes;
     private long latestMainExpansionFileVersionCode;
     private long latestPatchExpansionFileVersionCode;
@@ -55,14 +55,14 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
     ApkUploadTask(TaskListener listener, GoogleRobotCredentials credentials, String applicationId,
                   FilePath workspace, List<UploadFile> appFilesToUpload, Map<Long, ExpansionFileSet> expansionFiles,
                   boolean usePreviousExpansionFilesIfMissing, String trackName, String releaseName, double rolloutPercentage,
-                  ApkPublisher.RecentChanges[] recentChangeList, Integer inAppUpdatePriority, List<Long> bundlesToInclude) {
+                  ApkPublisher.RecentChanges[] recentChangeList, Integer inAppUpdatePriority, List<Long> additionalVersionCodes) {
         super(listener, credentials, applicationId, trackName, releaseName, rolloutPercentage, inAppUpdatePriority);
         this.workspace = workspace;
         this.appFilesToUpload = appFilesToUpload;
         this.expansionFiles = expansionFiles;
         this.usePreviousExpansionFilesIfMissing = usePreviousExpansionFilesIfMissing;
         this.recentChangeList = recentChangeList;
-        this.bundlesToInclude = bundlesToInclude;
+        this.additionalVersionCodes = additionalVersionCodes;
         this.existingVersionCodes = new ArrayList<>();
     }
 
@@ -172,10 +172,10 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
             logger.printf(" %n");
         }
 
-        if (!bundlesToInclude.isEmpty()) {
-            logger.printf("Including existing version codes: %s", join(bundlesToInclude, ", "));
+        if (!additionalVersionCodes.isEmpty()) {
+            logger.printf("Including existing version codes: %s", join(additionalVersionCodes, ", "));
             logger.printf(" %n");
-            uploadedVersionCodes.addAll(bundlesToInclude);
+            uploadedVersionCodes.addAll(additionalVersionCodes);
         }
 
         if (inAppUpdatePriority != null) {

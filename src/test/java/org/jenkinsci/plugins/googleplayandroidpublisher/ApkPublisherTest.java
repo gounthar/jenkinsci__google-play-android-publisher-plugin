@@ -397,7 +397,7 @@ public class ApkPublisherTest {
         publisher.setTrackName("${TRACK_NAME}");
         publisher.setReleaseName("${RELEASE_NAME}");
         publisher.setRolloutPercentage("${ROLLOUT_PCT}");
-        publisher.setBundlesToInclude("${ADDITIONAL_VERSIONS}");
+        publisher.setAdditionalVersionCodes("${ADDITIONAL_VERSIONS}");
         p.getPublishersList().add(publisher);
 
         // And the prerequisites are in place
@@ -750,7 +750,7 @@ public class ApkPublisherTest {
         String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
                 "  trackName: 'production',\n"+
                 "  rolloutPercentage: '100',\n"+
-                "  bundlesToInclude: '1, 2, 3, 4'";
+                "  additionalVersionCodes: '1, 2, 3, 4'";
 
         uploadApkWithPipelineAndAssertSuccess(stepDefinition, "Including existing version codes: 1, 2, 3, 4");
     }
@@ -762,7 +762,7 @@ public class ApkPublisherTest {
         String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
                 "  trackName: 'production',\n"+
                 "  rolloutPercentage: '100',\n"+
-                "  bundlesToInclude: '1,2,3,fake,5'";
+                "  additionalVersionCodes: '1,2,3,fake,5'";
 
         // When a build occurs, it should fail due to the invalid version code
         uploadApkWithPipelineAndAssertFailure(
