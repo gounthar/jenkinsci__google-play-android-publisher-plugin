@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,6 +65,7 @@ public class ApkPublisher extends GooglePlayPublisher {
     private String rolloutPercentage;
     private RecentChanges[] recentChangeList;
     private String inAppUpdatePriority;
+    private String additionalVersionCodes;
 
     // This field was used before AAB support was introduced; it will be migrated to `filesPattern` for Freestyle jobs
     @Deprecated private transient String apkFilesPattern;
@@ -172,6 +174,16 @@ public class ApkPublisher extends GooglePlayPublisher {
     @Nullable
     public String getTrackName() {
         return fixEmptyAndTrim(trackName);
+    }
+
+    @DataBoundSetter
+    public void setAdditionalVersionCodes(String additionalVersionCodes) {
+        this.additionalVersionCodes = additionalVersionCodes;
+    }
+
+    @Nullable
+    public String getAdditionalVersionCodes() {
+        return fixEmptyAndTrim(additionalVersionCodes);
     }
 
     @DataBoundSetter
@@ -296,6 +308,26 @@ public class ApkPublisher extends GooglePlayPublisher {
         return expanded;
     }
 
+    @Nullable
+    private String getExpandedAdditionalVersionCodesString() throws IOException, InterruptedException {
+        return expand(getAdditionalVersionCodes());
+    }
+
+    @Nonnull
+    private List<Long> getExpandedAdditionalVersionCodes() throws IOException, InterruptedException {
+        String versionCodesStr = getExpandedAdditionalVersionCodesString();
+        if (versionCodesStr == null) {
+            return Collections.emptyList();
+        }
+
+        List<Long> versionCodes = new ArrayList<>();
+        for (String s : versionCodesStr.split("[,\\s]+")) {
+            Long versionCode = (Long) tryParseNumber(s.trim(), null);
+            versionCodes.add(versionCode);
+        }
+        return versionCodes;
+    }
+
     private String getExpandedInAppUpdatePriorityString() throws IOException, InterruptedException {
         return expand(getInAppUpdatePriority());
     }
@@ -339,6 +371,13 @@ public class ApkPublisher extends GooglePlayPublisher {
         // Check whether in-app priority could be parsed to a number
         if (getExpandedInAppUpdatePriorityString() != null && getExpandedInAppUpdatePriority() == null) {
             errors.add(String.format("'%s' is not a valid update priority", getExpandedInAppUpdatePriorityString()));
+        }
+
+        // Check whether all additional version codes are valid
+        List<Long> additionalVersionCodes = getExpandedAdditionalVersionCodes();
+        if (!additionalVersionCodes.isEmpty() && additionalVersionCodes.contains(null)) {
+            errors.add(String.format("Additional app files to include contains non-numeric values: '%s'",
+                    getExpandedAdditionalVersionCodesString()));
         }
 
         // Print accumulated errors
@@ -525,7 +564,8 @@ public class ApkPublisher extends GooglePlayPublisher {
             GoogleRobotCredentials credentials = getCredentialsHandler().getServiceAccountCredentials(run.getParent());
             return workspace.act(new ApkUploadTask(listener, credentials, applicationId, workspace, validFiles,
                     expansionFiles, usePreviousExpansionFilesIfMissing, getCanonicalTrackName(), getExpandedReleaseName(),
-                    getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority()));
+                    getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority(),
+                    getExpandedAdditionalVersionCodes()));
         } catch (UploadException e) {
             logger.println(String.format("Upload failed: %s", getPublisherErrorMessage(e)));
             logger.println("No changes have been applied to the Google Play account");

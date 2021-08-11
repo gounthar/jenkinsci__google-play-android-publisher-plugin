@@ -1,0 +1,18 @@
+<div>
+  Specifies the version codes of app files from a previous release which should be included in the release to be created
+  by this build step.
+  <p/>
+  For example, if you have a Wear OS app file already released, but in this build step you only need to upload new
+  mobile app files, you can enter the version code of the Wear OS app file to retain it for this new release, rather
+  than having to upload it again here.
+  <p/>
+  Similarly, if you're using Multiple APK Support, you may have a situation where you only need to release an update to
+  a single APK, and so you can use this functionality to retain the other APKs for this new release by entering their
+  version codes.
+  <p/>
+  If you don't need this functionality, you can leave this field blank.
+  Note that multiple entries must be comma-separated.
+  <hr/>
+  This field supports substituting environment variables in the form
+  <tt>${SOME_VARIABLE}</tt> or <tt>$SOME_VARIABLE</tt> at build time.
+</div>

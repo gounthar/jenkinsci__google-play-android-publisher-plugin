@@ -26,6 +26,11 @@
         field="usePreviousExpansionFilesIfMissing" />
   </f:entry>
 
+  <f:entry title="${%Additional versions to include}" field="additionalVersionCodes"
+      description="${%Optional, comma-separated list of version codes}">
+    <f:textbox />
+  </f:entry>
+
   <f:entry title="${%Release track}" field="trackName">
     <f:combobox style="width:15em" />
   </f:entry>

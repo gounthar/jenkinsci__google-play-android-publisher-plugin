@@ -31,10 +31,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import static hudson.Functions.humanReadableByteSize;
+import static hudson.Util.join;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.ApkPublisher.ExpansionFileSet;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.ApkPublisher.RecentChanges;
-import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUSCATION_FILE_TYPE_PROGUARD;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUSCATION_FILE_TYPE_NATIVE_CODE;
+import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUSCATION_FILE_TYPE_PROGUARD;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_TYPE_MAIN;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_TYPE_PATCH;
 
@@ -45,6 +46,7 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
     private final Map<Long, ExpansionFileSet> expansionFiles;
     private final boolean usePreviousExpansionFilesIfMissing;
     private final RecentChanges[] recentChangeList;
+    private final List<Long> additionalVersionCodes;
     private final List<Long> existingVersionCodes;
     private long latestMainExpansionFileVersionCode;
     private long latestPatchExpansionFileVersionCode;
@@ -53,13 +55,14 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
     ApkUploadTask(TaskListener listener, GoogleRobotCredentials credentials, String applicationId,
                   FilePath workspace, List<UploadFile> appFilesToUpload, Map<Long, ExpansionFileSet> expansionFiles,
                   boolean usePreviousExpansionFilesIfMissing, String trackName, String releaseName, double rolloutPercentage,
-                  ApkPublisher.RecentChanges[] recentChangeList, Integer inAppUpdatePriority) {
+                  ApkPublisher.RecentChanges[] recentChangeList, Integer inAppUpdatePriority, List<Long> additionalVersionCodes) {
         super(listener, credentials, applicationId, trackName, releaseName, rolloutPercentage, inAppUpdatePriority);
         this.workspace = workspace;
         this.appFilesToUpload = appFilesToUpload;
         this.expansionFiles = expansionFiles;
         this.usePreviousExpansionFilesIfMissing = usePreviousExpansionFilesIfMissing;
         this.recentChangeList = recentChangeList;
+        this.additionalVersionCodes = additionalVersionCodes;
         this.existingVersionCodes = new ArrayList<>();
     }
 
@@ -167,6 +170,12 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
                 logger.println("Ignoring expansion file settings, as we are uploading AAB file(s)");
             }
             logger.printf(" %n");
+        }
+
+        if (!additionalVersionCodes.isEmpty()) {
+            logger.printf("Including existing version codes: %s", join(additionalVersionCodes, ", "));
+            logger.printf(" %n");
+            uploadedVersionCodes.addAll(additionalVersionCodes);
         }
 
         if (inAppUpdatePriority != null) {
