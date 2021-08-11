@@ -50,7 +50,7 @@ abstract class TrackPublisherTask<V> extends AbstractPublisherTask<V> {
         final boolean isDraft = release.getStatus().equals("draft");
         logger.printf("Updating release track '%s':%n", trackName);
         logger.printf("- Application ID:  %s%n", applicationId);
-        logger.printf("- Version codes:   %s%n", join(versionCodes, ", "));
+        logger.printf("- Version codes:   %s%n", join(versionCodes.stream().sorted().collect(Collectors.toList()), ", "));
         logger.printf("- Staged rollout:  %s%% %s%n", PERCENTAGE_FORMATTER.format(rolloutFraction * 100), isDraft ? "(draft)" : "");
         logger.printf("- Update priority: %s%n", inAppUpdatePriority == null ? "(default)" : inAppUpdatePriority);
         logger.printf("- Release name:    %s%n", releaseName == null ? "(default)" : releaseName);

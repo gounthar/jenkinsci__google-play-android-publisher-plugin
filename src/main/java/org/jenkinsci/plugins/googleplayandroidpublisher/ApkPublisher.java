@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -176,10 +177,14 @@ public class ApkPublisher extends GooglePlayPublisher {
     }
 
     @DataBoundSetter
-    public void setBundlesToInclude(String bundlesToInclude) { this.bundlesToInclude = bundlesToInclude; }
+    public void setBundlesToInclude(String bundlesToInclude) {
+        this.bundlesToInclude = bundlesToInclude;
+    }
 
     @Nullable
-    public String getBundlesToInclude(){ return bundlesToInclude; }
+    public String getBundlesToInclude() {
+        return fixEmptyAndTrim(bundlesToInclude);
+    }
 
     @DataBoundSetter
     public void setReleaseName(String releaseName) {
@@ -303,20 +308,24 @@ public class ApkPublisher extends GooglePlayPublisher {
         return expanded;
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    private List<Long> getExpandedBundlesToInclude() {
-        if(bundlesToInclude == null || bundlesToInclude.isEmpty()) {
-            return new ArrayList<>();
+    @Nullable
+    private String getExpandedBundlesToIncludeString() throws IOException, InterruptedException {
+        return expand(getBundlesToInclude());
+    }
+
+    @Nonnull
+    private List<Long> getExpandedBundlesToInclude() throws IOException, InterruptedException {
+        String versionCodesStr = getExpandedBundlesToIncludeString();
+        if (versionCodesStr == null) {
+            return Collections.emptyList();
         }
 
-        List<Long> versionCodeList = new ArrayList<>();
-        String codes = bundlesToInclude;
-        for (String s : codes.split("[,\\s]+")) {
-            long versionCode = tryParseNumber(s.trim(), -1).longValue();
-            versionCodeList.add(versionCode);
+        List<Long> versionCodes = new ArrayList<>();
+        for (String s : versionCodesStr.split("[,\\s]+")) {
+            Long versionCode = (Long) tryParseNumber(s.trim(), null);
+            versionCodes.add(versionCode);
         }
-
-        return versionCodeList;
+        return versionCodes;
     }
 
     private String getExpandedInAppUpdatePriorityString() throws IOException, InterruptedException {
@@ -364,10 +373,11 @@ public class ApkPublisher extends GooglePlayPublisher {
             errors.add(String.format("'%s' is not a valid update priority", getExpandedInAppUpdatePriorityString()));
         }
 
-        // Check whether all bundle to include are valid
+        // Check whether all additional version codes are valid
         List<Long> bundlesToInclude = getExpandedBundlesToInclude();
-        if(!bundlesToInclude.isEmpty() && bundlesToInclude.contains(-1L)){
-            errors.add(String.format("Use bundlesToInclude: '1,2,3'"));
+        if (!bundlesToInclude.isEmpty() && bundlesToInclude.contains(null)) {
+            errors.add(String.format("Additional app files to include contains non-numeric values: '%s'",
+                    getExpandedBundlesToIncludeString()));
         }
 
         // Print accumulated errors
@@ -554,7 +564,8 @@ public class ApkPublisher extends GooglePlayPublisher {
             GoogleRobotCredentials credentials = getCredentialsHandler().getServiceAccountCredentials(run.getParent());
             return workspace.act(new ApkUploadTask(listener, credentials, applicationId, workspace, validFiles,
                     expansionFiles, usePreviousExpansionFilesIfMissing, getCanonicalTrackName(), getExpandedReleaseName(),
-                    getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority(), getExpandedBundlesToInclude()));
+                    getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority(),
+                    getExpandedBundlesToInclude()));
         } catch (UploadException e) {
             logger.println(String.format("Upload failed: %s", getPublisherErrorMessage(e)));
             logger.println("No changes have been applied to the Google Play account");

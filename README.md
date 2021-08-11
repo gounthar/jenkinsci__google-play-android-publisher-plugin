@@ -197,7 +197,7 @@ The `androidApkUpload` build step lets you upload Android App Bundle (AAB) or AP
 | usePreviousExpansion<br>FilesIfMissing | boolean | `false`            | `true`                                                   | Whether to re-use the existing expansion files that have already been uploaded to Google Play for this app, if any expansion files are missing |
 | recentChangeList                   | list    | (see below)            | (empty)                                                  | List of recent change texts to associate with the upload app files                                                     |
 | inAppUpdatePriority                | string  | `'1'`                  | `'0'`                                                    | Priority of this release, used by the Google Play Core in-app update feature                                           |
-| bundlesToInclude                   | string  | `'1, 2, 3'`            | (empty)                                                  | Include bundles from previous releases, used to publish Wearable variants of your app                                  |
+| bundlesToInclude                   | string  | `'101, 102'`           | (none)                                                   | Version codes of existing app files which should be included in the new release being created                          |
 
 The `googlePlayCredentialsId`, `trackName`, and `rolloutPercentage` parameters are mandatory, e.g. a minimal configuration would be:
 ```groovy

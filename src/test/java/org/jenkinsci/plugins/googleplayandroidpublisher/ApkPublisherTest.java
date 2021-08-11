@@ -385,7 +385,8 @@ public class ApkPublisherTest {
             new StringParameterDefinition("APK_PATTERN", "**/app.apk"),
             new StringParameterDefinition("TRACK_NAME", "production"),
             new StringParameterDefinition("RELEASE_NAME", "1.2.3"),
-            new StringParameterDefinition("ROLLOUT_PCT", "12.5%")
+            new StringParameterDefinition("ROLLOUT_PCT", "12.5%"),
+            new StringParameterDefinition("ADDITIONAL_VERSIONS", "5, 55")
         );
         p.addProperty(pdp);
 
@@ -396,6 +397,7 @@ public class ApkPublisherTest {
         publisher.setTrackName("${TRACK_NAME}");
         publisher.setReleaseName("${RELEASE_NAME}");
         publisher.setRolloutPercentage("${ROLLOUT_PCT}");
+        publisher.setBundlesToInclude("${ADDITIONAL_VERSIONS}");
         p.getPublishersList().add(publisher);
 
         // And the prerequisites are in place
@@ -406,8 +408,9 @@ public class ApkPublisherTest {
         // When a build occurs, it should apply the default parameter values
         assertResultWithLogLines(j, p, Result.SUCCESS,
             "- Credential:     test-credentials",
+            "Including existing version codes: 5, 55",
             "Updating release track 'production':",
-            "- Version codes:   42",
+            "- Version codes:   5, 42, 55",
             "- Staged rollout:  12.5%",
             "- Release name:    1.2.3",
             "Changes were successfully applied to Google Play"
@@ -734,7 +737,7 @@ public class ApkPublisherTest {
                 "  rolloutPercentage: '100',\n"+
                 "  inAppUpdatePriority: 'fake'";
 
-        // When a build occurs, it should roll out to that percentage
+        // When a build occurs, it fail due to the invalid priority
         uploadApkWithPipelineAndAssertFailure(
                 stepDefinition,
                 "'fake' is not a valid update priority"
@@ -742,58 +745,29 @@ public class ApkPublisherTest {
     }
 
     @Test
-    public void uploadingApkWithPipelineWithIncludeBundlesSucceeds() throws Exception{
-        // Given a step with in-app update priority
-        String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
-                "  trackName: 'production',\n"+
-                "  rolloutPercentage: '100',\n"+
-                "  bundlesToInclude: '1'";
-
-        uploadApkWithPipelineAndAssertSuccess(stepDefinition,
-                "Adding 1 bundle(s) to include");
-    }
-
-    @Test
-    public void uploadingApkWithPipelineWithIncludeBundlesFails() throws Exception{
-        // Given a step with in-app update priority
-        // But whose value is not a valid integer
-        String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
-                "  trackName: 'production',\n"+
-                "  rolloutPercentage: '100',\n"+
-                "  bundlesToInclude: 'fake'";
-
-        // When a build occurs, it should roll out to that percentage
-        uploadApkWithPipelineAndAssertFailure(
-                stepDefinition,
-                "Use bundlesToInclude: '1,2,3'"
-        );
-    }
-
-    @Test
     public void uploadingApkWithPipelineWithMultipleIncludeBundlesSucceeds() throws Exception{
-        // Given a step with in-app update priority
+        // Given a step with additional version codes
         String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
                 "  trackName: 'production',\n"+
                 "  rolloutPercentage: '100',\n"+
                 "  bundlesToInclude: '1, 2, 3, 4'";
 
-        uploadApkWithPipelineAndAssertSuccess(stepDefinition,
-                "Adding 4 bundle(s) to include");
+        uploadApkWithPipelineAndAssertSuccess(stepDefinition, "Including existing version codes: 1, 2, 3, 4");
     }
 
     @Test
-    public void uploadingApkWithPipelineWithMultipleIncludeBundlesFails() throws Exception{
-        // Given a step with in-app update priority
+    public void uploadingApkWithPipelineWithInvalidIncludeBundlesFails() throws Exception{
+        // Given a step with additional version codes
         // But whose value is not a valid integer
         String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
                 "  trackName: 'production',\n"+
                 "  rolloutPercentage: '100',\n"+
                 "  bundlesToInclude: '1,2,3,fake,5'";
 
-        // When a build occurs, it should roll out to that percentage
+        // When a build occurs, it should fail due to the invalid version code
         uploadApkWithPipelineAndAssertFailure(
                 stepDefinition,
-                "Use bundlesToInclude: '1,2,3'"
+                "Additional app files to include contains non-numeric values: '1,2,3,fake,5'"
         );
     }
 

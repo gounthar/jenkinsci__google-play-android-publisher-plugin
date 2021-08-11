@@ -31,10 +31,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import static hudson.Functions.humanReadableByteSize;
+import static hudson.Util.join;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.ApkPublisher.ExpansionFileSet;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.ApkPublisher.RecentChanges;
-import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUSCATION_FILE_TYPE_PROGUARD;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUSCATION_FILE_TYPE_NATIVE_CODE;
+import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUSCATION_FILE_TYPE_PROGUARD;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_TYPE_MAIN;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_TYPE_PATCH;
 
@@ -171,16 +172,15 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
             logger.printf(" %n");
         }
 
+        if (!bundlesToInclude.isEmpty()) {
+            logger.printf("Including existing version codes: %s", join(bundlesToInclude, ", "));
+            logger.printf(" %n");
+            uploadedVersionCodes.addAll(bundlesToInclude);
+        }
+
         if (inAppUpdatePriority != null) {
             logger.printf("Setting in-app update priority to %d%n", inAppUpdatePriority);
             logger.printf(" %n");
-        }
-
-        // Bundles to include from previous releases. Can be used to update Wearable bundles separately
-        if(!bundlesToInclude.isEmpty()) {
-            logger.printf("Adding %d bundle(s) to include %n", bundlesToInclude.size());
-            logger.printf(" %n");
-            uploadedVersionCodes.addAll(bundlesToInclude);
         }
 
         // Assign all uploaded app files to the configured track
