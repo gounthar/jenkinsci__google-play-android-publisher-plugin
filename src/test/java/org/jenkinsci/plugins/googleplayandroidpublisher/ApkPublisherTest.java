@@ -24,8 +24,7 @@ import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeL
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakePostEditsResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakePutApkResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakePutBundleResponse;
-import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeUploadApkResponse;
-import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeUploadBundleResponse;
+import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeUploadResponse;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.junit.After;
@@ -1014,8 +1013,8 @@ public class ApkPublisherTest {
                             }}
                         ))
                 .withResponse("/edits/the-edit-id/apks?uploadType=resumable",
-                        new FakeUploadApkResponse().willContinue())
-                .withResponse("google.local/uploading/foo/apk",
+                        new FakeUploadResponse().willContinue())
+                .withResponse("google.local/uploading/foo",
                         new FakePutApkResponse().success(42, "the:sha"))
                 .withResponse("/edits/the-edit-id/tracks/" + trackName,
                         new FakeAssignTrackResponse().success(trackName, 42))
@@ -1047,8 +1046,8 @@ public class ApkPublisherTest {
                             }}
                         ))
                 .withResponse("/edits/the-edit-id/bundles?ackBundleInstallationWarning=true&uploadType=resumable",
-                        new FakeUploadBundleResponse().willContinue())
-                .withResponse("google.local/uploading/foo/bundle",
+                        new FakeUploadResponse().willContinue())
+                .withResponse("google.local/uploading/foo",
                         new FakePutBundleResponse().success(43, "the:sha"))
                 .withResponse("/edits/the-edit-id/tracks/production",
                         new FakeAssignTrackResponse().success("production", 43))
