@@ -43,8 +43,16 @@ public abstract class AbstractPublisherTask<V> extends MasterToSlaveCallable<V, 
     protected abstract V execute() throws IOException, InterruptedException, UploadException;
 
     protected final AndroidPublisher.Edits getEditService() throws UploadException {
+        return getPublisherClient().edits();
+    }
+
+    protected final AndroidPublisher.Internalappsharingartifacts getInternalAppSharing() throws UploadException {
+        return getPublisherClient().internalappsharingartifacts();
+    }
+
+    private AndroidPublisher getPublisherClient() throws UploadException {
         try {
-            return Util.getPublisherClient(credentials, pluginVersion).edits();
+            return Util.getPublisherClient(credentials, pluginVersion);
         } catch (GeneralSecurityException e) {
             throw new UploadException(e);
         }

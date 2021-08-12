@@ -18,6 +18,7 @@ import org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestHttpTranspo
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestUtilImpl;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeAssignTrackResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeCommitResponse;
+import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeInternalAppSharingArtifactResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeListApksResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeListBundlesResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeListTracksResponse;
@@ -770,6 +771,24 @@ public class ApkPublisherTest {
         );
     }
 
+    @Test
+    public void uploadingApkWithPipelineToInternalAppSharingSucceeds() throws Exception {
+        // Given a step that wants to upload to internal app sharing
+        String stepDefinition = "androidApkUpload googleCredentialsId: 'test-credentials',\n" +
+                "  trackName: 'internal-app-sharing'";
+        setUpTransportForInternalApkSharing();
+
+        // When a build occurs
+        // Then the APK should be successfully uploaded and assigned to the custom track
+        uploadApkWithPipelineAndAssertResult(
+                stepDefinition,
+                Result.SUCCESS,
+                "versionCode: 42",
+                "Internal app sharing file was successfully uploaded",
+                "https://play.google.com/test/download.apk"
+        );
+    }
+
     private void uploadApkWithPipelineAndAssertFailure(
         String stepDefinition, String... expectedLogLines
     ) throws Exception {
@@ -1020,6 +1039,15 @@ public class ApkPublisherTest {
                         new FakeAssignTrackResponse().success(trackName, 42))
                 .withResponse("/edits/the-edit-id:commit",
                         new FakeCommitResponse().success())
+        ;
+    }
+
+    private void setUpTransportForInternalApkSharing() {
+        transport
+                .withResponse("/internalappsharing/org.jenkins.appId/artifacts/apk?uploadType=resumable",
+                        new FakeUploadResponse().willContinue())
+                .withResponse("google.local/uploading/foo",
+                        new FakeInternalAppSharingArtifactResponse().success())
         ;
     }
 
