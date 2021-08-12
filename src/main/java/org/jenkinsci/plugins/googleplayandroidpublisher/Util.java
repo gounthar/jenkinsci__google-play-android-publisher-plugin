@@ -6,6 +6,7 @@ import com.google.api.services.androidpublisher.model.TrackRelease;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
+import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -155,6 +156,19 @@ public class Util {
 
         if (releaseNotes != null) release.setReleaseNotes(releaseNotes);
         return release;
+    }
+
+    /** @return The path to the given file, relative to the build workspace. */
+    static String getRelativeFileName(FilePath workspace, FilePath file) {
+        final String ws = workspace.getRemote();
+        String path = file.getRemote();
+        if (path.startsWith(ws) && path.length() > ws.length()) {
+            path = path.substring(ws.length());
+        }
+        if (path.charAt(0) == File.separatorChar && path.length() > 1) {
+            path = path.substring(1);
+        }
+        return path;
     }
 
     @VisibleForTesting

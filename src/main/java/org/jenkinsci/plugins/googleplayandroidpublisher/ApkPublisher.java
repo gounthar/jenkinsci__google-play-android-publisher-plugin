@@ -51,6 +51,7 @@ import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.REGEX_LANGUA
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.REGEX_VARIABLE;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.SUPPORTED_LANGUAGES;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.getPublisherErrorMessage;
+import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.getRelativeFileName;
 
 /** Uploads Android application files to the Google Play Developer Console. */
 public class ApkPublisher extends GooglePlayPublisher {
