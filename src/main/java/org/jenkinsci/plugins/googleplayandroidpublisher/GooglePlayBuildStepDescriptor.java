@@ -16,6 +16,9 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static hudson.Util.fixEmptyAndTrim;
 import static hudson.Util.tryParseNumber;
@@ -85,7 +88,11 @@ public abstract class GooglePlayBuildStepDescriptor<T extends BuildStep & Descri
 
     public ComboBoxModel doFillTrackNameItems() {
         // Auto-complete the default track names, though users can also enter custom track names
-        return new ComboBoxModel("internal", "alpha", "beta", "production");
+        List<String> trackNames = new ArrayList<>(Arrays.asList("internal", "alpha", "beta", "production"));
+        if (clazz.isAssignableFrom(ApkPublisher.class)) {
+            trackNames.add("internal-app-sharing");
+        }
+        return new ComboBoxModel(trackNames.toArray(new String[0]));
     }
 
     public FormValidation doCheckTrackName(@QueryParameter String value) {

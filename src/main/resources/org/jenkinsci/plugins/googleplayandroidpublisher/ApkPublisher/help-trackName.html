@@ -1,24 +1,32 @@
 <div>
-  The release track to which the given file(s) will be assigned.
-  <p/>
-  This can be the name of a
+  Specifies the release track to which the given app file(s) will be assigned, or uploaded.
+  <h2>Regular release tracks</h2>
+  You can enter the name of a
   <a href='https://support.google.com/googleplay/android-developer/answer/3131213#create_additional_track'>custom
   track</a>, or one of the built-in tracks:
   <ul>
-    <li>internal</li>
-    <li>alpha</li>
-    <li>beta</li>
-    <li>production</li>
+    <li><tt>internal</tt></li>
+    <li><tt>alpha</tt></li>
+    <li><tt>beta</tt></li>
+    <li><tt>production</tt></li>
   </ul>
-  For each release track, you have the choice of rolling your new version out
-  to all existing users simultaneously, or doing a staged rollout so that only
-  a fraction of your existing userbase will be able to download the new version.
+  For these tracks, you have the choice of rolling out the uploaded app files
+  to all existing users immediately, or doing a staged rollout so that only
+  a percentage of your existing userbase will be able to download the new version.
+  Alternatively, you can set the rollout percentage to zero to create a draft release.
   <p/>
   For more information on using the internal, alpha, beta or custom testing tracks,
   see the Google Play documentation:<br/>
   <a href='https://support.google.com/googleplay/android-developer/answer/3131213'>
     https://support.google.com/googleplay/android-developer/answer/3131213
   </a>
+  <h2>Internal App Sharing</h2>
+  Alternatively, you can use the special track name <tt>internal-app-sharing</tt>, which will upload the app file —
+  either an AAB or APK file — directly to <a href='https://support.google.com/googleplay/android-developer/answer/9844679'>
+  Internal App Sharing</a>.
+  In this case, no other build step configuration is required, other than the Google Play credentials.
+  <p/>
+  Upon successful upload, the download URL for the uploaded file will be output to the build log.
   <hr/>
   This field supports substituting environment variables in the form
   <tt>${SOME_VARIABLE}</tt> or <tt>$SOME_VARIABLE</tt> at build time.

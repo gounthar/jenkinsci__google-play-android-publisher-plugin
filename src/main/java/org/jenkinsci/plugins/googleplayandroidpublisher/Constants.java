@@ -5,6 +5,9 @@ import java.util.regex.Pattern;
 
 public class Constants {
 
+    /** Special track name which, if used, will upload a file to Internal App Sharing, rather than a release track. */
+    public static final String TRACK_NAME_INTERNAL_APP_SHARING = "internal-app-sharing";
+
     /** Deobfuscation file type: proguard */
     public static final String DEOBFUSCATION_FILE_TYPE_PROGUARD = "proguard";
 

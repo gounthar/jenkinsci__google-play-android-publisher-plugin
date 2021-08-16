@@ -11,7 +11,7 @@ import com.google.api.services.androidpublisher.model.ApkBinary;
  * @see com.google.api.services.androidpublisher.AndroidPublisher.Edits.Apks#upload Apks.upload() - Original request method
  * @see com.google.api.services.androidpublisher.model.Apk Apk - Response type
  * @see com.google.api.services.androidpublisher.model.ApkBinary ApkBinary - Response inner type
- * @see FakeUploadApkResponse FakeUploadApkResponse (first half of this request)
+ * @see FakeUploadResponse FakeUploadResponse (first half of this request)
  */
 public class FakePutApkResponse extends FakeHttpResponse<FakePutApkResponse> {
     public FakePutApkResponse success(int versionCode, String sha1) {

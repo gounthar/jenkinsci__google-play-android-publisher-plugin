@@ -38,6 +38,7 @@ import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUS
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.DEOBFUSCATION_FILE_TYPE_PROGUARD;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_TYPE_MAIN;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_TYPE_PATCH;
+import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.getRelativeFileName;
 
 class ApkUploadTask extends TrackPublisherTask<Boolean> {
 
@@ -119,7 +120,7 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
         for (UploadFile appFile : appFilesToUpload) {
             // Log some useful information about the file that will be uploaded
             final String fileType = (fileFormat == AppFileFormat.BUNDLE) ? "AAB" : "APK";
-            logger.printf("         %s file: %s%n", fileType, getRelativeFileName(appFile.getFilePath()));
+            logger.printf("         %s file: %s%n", fileType, getRelativeFileName(workspace, appFile.getFilePath()));
             logger.printf("        File size: %s%n", humanReadableByteSize(appFile.getFilePath().length()));
             logger.printf("       SHA-1 hash: %s%n", appFile.getSha1Hash());
             logger.printf("      versionCode: %d%n", appFile.getVersionCode());
@@ -220,7 +221,7 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
         }
 
         // Google Play API doesn't accept empty mapping files
-        final String relativeFileName = getRelativeFileName(mappingFile);
+        final String relativeFileName = getRelativeFileName(workspace, mappingFile);
         if (mappingFile.length() == 0) {
             logger.printf(" Ignoring empty %s file: %s%n", mappingFileTypeName, relativeFileName);
         } else {
@@ -378,19 +379,6 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
 
         // The upload succeeded if the current list of version codes intersects with the list we tried to upload
         return uploadedVersionCodes.removeAll(currentVersionCodes);
-    }
-
-    /** @return The path to the given file, relative to the build workspace. */
-    private String getRelativeFileName(FilePath file) {
-        final String ws = workspace.getRemote();
-        String path = file.getRemote();
-        if (path.startsWith(ws) && path.length() > ws.length()) {
-            path = path.substring(ws.length());
-        }
-        if (path.charAt(0) == File.separatorChar && path.length() > 1) {
-            path = path.substring(1);
-        }
-        return path;
     }
 
     @Nullable

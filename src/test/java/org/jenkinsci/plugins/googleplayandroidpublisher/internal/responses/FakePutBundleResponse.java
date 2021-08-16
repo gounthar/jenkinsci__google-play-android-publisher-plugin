@@ -9,7 +9,7 @@ import com.google.api.services.androidpublisher.model.Bundle;
  *
  * @see com.google.api.services.androidpublisher.AndroidPublisher.Edits.Bundles#upload Bundles.upload() - Original request method
  * @see Bundle Bundle - Response type
- * @see FakeUploadBundleResponse FakeUploadBundleResponse (first half of this request)
+ * @see FakeUploadResponse FakeUploadResponse (first half of this request)
  */
 public class FakePutBundleResponse extends FakeHttpResponse<FakePutBundleResponse> {
     public FakePutBundleResponse success(int versionCode, String sha1) {

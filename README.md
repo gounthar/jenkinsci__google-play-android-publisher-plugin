@@ -14,12 +14,13 @@ Enables Jenkins to manage and upload Android app files (AAB or APK) to Google Pl
     - With the option to re-use expansion files from existing APKs, e.g. for patch releases
   - App files from previous releases can be included when creating a release
   - The update priority can be set, if using [in-app updates][gp-docs-inappupdates]
+  - Release notes can be added, for various languages
+- Staged rollout of apps to any release track
+- Uploading app files without yet rolling out to users, creating a draft release
 - Assigning apps to internal, alpha, beta, production, or custom release tracks
   - This includes a build step for moving existing versions to a different track, or updating the rollout percentage   
     e.g. You can upload an alpha in one job, then later have another job promote it to beta
-- Staged rollout of apps to any release track
-- Uploading files without yet rolling out, creating a draft release
-- Assigning release notes to uploaded files, for various languages
+- Uploading app files to [Internal App Sharing][gp-docs-internalappsharing]
 - Changing the Jenkins build result to failed if the configuration is bad, or uploading or moving app files fails for some reason
 - Every configuration field supports variable and [token][plugin-token-macro] expansion, allowing release notes to be dynamically generated, for example
 - Integration with the [Google OAuth Credentials Plugin][plugin-google-oauth], so that Google Play credentials can be entered once globally, stored securely, and shared between jobs
@@ -164,6 +165,15 @@ For example, if you have a Wear OS app file already released, but during a build
 
 Any version codes entered in the "Additional app files to include" field will be assigned to the specified release track along with the uploaded app files.
 
+##### Uploading an app bundle or APK to Internal App Sharing
+The [Internal App Sharing][gp-docs-internalappsharing] feature of Google Play enables you to upload a single AAB or APK file for use by a restricted set of people, which can be easily installed by opening a URL on an Android device.
+
+You can use this feature with the "Upload Android AAB/APK to Google Play" build step by setting the release track name to `internal-app-sharing`.
+In this case, no other configuration is necessary other than the Google Play account, and optionally settings the files pattern.
+Note that this is different from uploading to the `internal` release track.
+
+Upon successful upload, the app installation URL returned by Google Play will be output to the build console log.
+
 ##### Moving existing app versions to another release track
 If you have already uploaded an app to the alpha track (for example), you can later use Jenkins to re-assign that version to the beta or production release track.
 
@@ -186,7 +196,7 @@ The `androidApkUpload` build step lets you upload Android App Bundle (AAB) or AP
 |------------------------------------|---------|------------------------|----------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
 | googlePlayCredentialsId            | string  | `'Google Play creds'`  | (none)                                                   | Name of the Google Service Account credential created in Jenkins                                                       |
 | filesPattern                       | string  | `'release/my-app.aab'` | `'**/build/outputs/**/*.aab, **/build/outputs/**/*.apk'` | Comma-separated glob patterns or filenames pointing to the app files to upload, relative to the root of the workspace  |
-| trackName                          | string  | `'internal'`           | (none)                                                   | Google Play track to which the app files should be published                                                           |
+| trackName                          | string  | `'internal'`           | (none)                                                   | Google Play track to which the app files should be published; or `internal-app-sharing` to upload directly to Internal App Sharing |
 | releaseName                        | string  | `'1.2.3'`              | (none)                                                   | Name used to identify this release in the Google Play Console. If not set, Google Play will use the app version name   |
 | rolloutPercentage                  | string  | `'1.5'`                | (none)                                                   | The rollout percentage to set on the track; use 0% to create a draft release                                           |
 | ~rolloutPercent~<br>(deprecated)   | number  | `1.5`                  | (none)                                                   | (deprecated, but still supported; prefer `rolloutPercentage` instead — it takes priority if both are defined)          |
@@ -206,6 +216,12 @@ androidApkUpload googleCredentialsId: 'My Google Play account',
 ```
 
 This will find any app files in the workspace matching the pattern `**/build/outputs/**/*.aab, **/build/outputs/**/*.apk`, upload them to the Production track, and make them available to 100% of users.
+
+Or if uploading a file to [Internal App Sharing][gp-docs-internalappsharing] on Google Play, then only the credentials are required, assuming that a single AAB or APK file is found in the build workspace:
+```groovy
+androidApkUpload googleCredentialsId: 'My Google Play account',
+                 trackName: 'internal-app-sharing'
+```
 
 A more complete example:
 ```groovy
@@ -411,6 +427,7 @@ See [CHANGELOG.md][changelog].
 [gp-docs-expansions]:https://developer.android.com/google/play/expansion-files.html
 [gp-docs-inappupdatepriority]:https://developer.android.com/guide/playcore/in-app-updates#check-priority
 [gp-docs-inappupdates]:https://developer.android.com/guide/playcore/in-app-updates
+[gp-docs-internalappsharing]:https://support.google.com/googleplay/android-developer/answer/9844679
 [gp-docs-rollout]:https://support.google.com/googleplay/android-developer/answer/6346149
 [gp-support-form]:https://support.google.com/googleplay/android-developer/contact/publishing?extra.IssueType=submitting&hl=en&ec=publish&cfsi=publish_cf&cfnti=escalationflow.email&cft=3&rd=1
 [issues-existing]:https://issues.jenkins-ci.org/issues/?jql=project%20%3D%20JENKINS%20AND%20component%20%3D%20google-play-android-publisher-plugin%20AND%20status%20NOT%20IN(Closed%2C%20Resolved)%20ORDER%20BY%20updated%20DESC

@@ -47,10 +47,12 @@ import static hudson.Util.join;
 import static hudson.Util.tryParseNumber;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_REGEX;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.OBB_FILE_TYPE_MAIN;
+import static org.jenkinsci.plugins.googleplayandroidpublisher.Constants.TRACK_NAME_INTERNAL_APP_SHARING;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.REGEX_LANGUAGE;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.REGEX_VARIABLE;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.SUPPORTED_LANGUAGES;
 import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.getPublisherErrorMessage;
+import static org.jenkinsci.plugins.googleplayandroidpublisher.Util.getRelativeFileName;
 
 /** Uploads Android application files to the Google Play Developer Console. */
 public class ApkPublisher extends GooglePlayPublisher {
@@ -261,8 +263,13 @@ public class ApkPublisher extends GooglePlayPublisher {
         return expand(getFilesPattern());
     }
 
+    @Nullable
     private String getCanonicalTrackName() throws IOException, InterruptedException {
         return expand(getTrackName());
+    }
+
+    private boolean isInternalAppSharingTrack() throws IOException, InterruptedException {
+        return TRACK_NAME_INTERNAL_APP_SHARING.equals(getCanonicalTrackName());
     }
 
     private String getExpandedReleaseName() throws IOException, InterruptedException {
@@ -357,14 +364,16 @@ public class ApkPublisher extends GooglePlayPublisher {
             errors.add("Release track was not specified; this is now a mandatory parameter");
         }
 
-        // Check for valid rollout percentage
-        final String pctStr = getExpandedRolloutPercentageString();
-        if (pctStr == null) {
-            errors.add("Rollout percentage was not specified; this is now a mandatory parameter");
-        } else {
-            double pct = getExpandedRolloutPercentage();
-            if (Double.isNaN(pct) || Double.compare(pct, 0) < 0 || Double.compare(pct, 100) > 0) {
-                errors.add(String.format("'%s' is not a valid rollout percentage", pctStr));
+        // Check for valid rollout percentage, if necessary
+        if (!isInternalAppSharingTrack()) {
+            final String pctStr = getExpandedRolloutPercentageString();
+            if (pctStr == null) {
+                errors.add("Rollout percentage was not specified; this is now a mandatory parameter");
+            } else {
+                double pct = getExpandedRolloutPercentage();
+                if (Double.isNaN(pct) || Double.compare(pct, 0) < 0 || Double.compare(pct, 100) > 0) {
+                    errors.add(String.format("'%s' is not a valid rollout percentage", pctStr));
+                }
             }
         }
 
@@ -451,6 +460,15 @@ public class ApkPublisher extends GooglePlayPublisher {
             }
         }
 
+        // If there are multiple matches, but internal app sharing was chosen, then we can't continue
+        if (isInternalAppSharingTrack() && validFiles.size() > 1) {
+            logger.println("Internal app sharing was selected, which requires a single app file, but multiple were found:");
+            for (UploadFile file : validFiles) {
+                logger.printf("  - %s%n", getRelativeFileName(workspace, file.getFilePath()));
+            }
+            return false;
+        }
+
         // If there are multiple matches, ensure that all have the same application ID
         final Set<String> applicationIds = validFiles.stream()
                 .map(UploadFile::getApplicationId).collect(Collectors.toSet());
@@ -458,7 +476,7 @@ public class ApkPublisher extends GooglePlayPublisher {
             logger.println(String.format("Multiple files matched the pattern '%s', " +
                             "but they have inconsistent application IDs:", filesPattern));
             for (String id : applicationIds) {
-                logger.print("- ");
+                logger.print("  - ");
                 logger.println(id);
             }
             return false;
@@ -562,10 +580,17 @@ public class ApkPublisher extends GooglePlayPublisher {
         // Upload the file(s) from the workspace
         try {
             GoogleRobotCredentials credentials = getCredentialsHandler().getServiceAccountCredentials(run.getParent());
-            return workspace.act(new ApkUploadTask(listener, credentials, applicationId, workspace, validFiles,
-                    expansionFiles, usePreviousExpansionFilesIfMissing, getCanonicalTrackName(), getExpandedReleaseName(),
-                    getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority(),
-                    getExpandedAdditionalVersionCodes()));
+            AbstractPublisherTask<Boolean> task;
+            if (isInternalAppSharingTrack()) {
+                UploadFile appFile = validFiles.get(0);
+                task = new InternalAppSharingUploadTask(listener, credentials, applicationId, workspace, appFile);
+            } else {
+                task = new ApkUploadTask(listener, credentials, applicationId, workspace, validFiles,
+                        expansionFiles, usePreviousExpansionFilesIfMissing, getCanonicalTrackName(), getExpandedReleaseName(),
+                        getExpandedRolloutPercentage(), getExpandedRecentChangesList(), getExpandedInAppUpdatePriority(),
+                        getExpandedAdditionalVersionCodes());
+            }
+            return workspace.act(task);
         } catch (UploadException e) {
             logger.println(String.format("Upload failed: %s", getPublisherErrorMessage(e)));
             logger.println("No changes have been applied to the Google Play account");
