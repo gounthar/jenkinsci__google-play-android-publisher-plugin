@@ -8,7 +8,6 @@ import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
 import hudson.model.TaskListener;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -94,18 +93,8 @@ class TrackAssignmentTask extends TrackPublisherTask<Boolean> {
         // Assign the version codes to the configured track
         assignAppFilesToTrack(trackName, rolloutFraction, versionCodes, inAppUpdatePriority, releaseName, releaseNotes);
 
-        // Commit the changes
-        try {
-            logger.println("Applying changes to Google Play...");
-            editService.commit(applicationId, editId).execute();
-        } catch (SocketTimeoutException e) {
-            // TODO: Check, in a new session, whether the given version codes are now in the desired track
-            logger.println(String.format("- An error occurred while applying changes: %s", e));
-            return false;
-        }
-
-        // If committing didn't throw an exception, everything worked fine
-        logger.println("Changes were successfully applied to Google Play");
+        // Commit the changes, which will throw an exception if there is a problem
+        commit();
         return true;
     }
 

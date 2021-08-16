@@ -18,10 +18,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -191,25 +189,8 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
             trackName, rolloutFraction, uploadedVersionCodes, inAppUpdatePriority, expandedReleaseName, releaseNotes
         );
 
-        // Commit all the changes
-        try {
-            logger.println("Applying changes to Google Play...");
-            editService.commit(applicationId, editId).execute();
-        } catch (SocketTimeoutException e) {
-            // The API is quite prone to timing out for no apparent reason,
-            // despite having successfully committed the changes on the backend.
-            // So here we check whether the files uploaded were actually committed
-            logger.println(String.format("- An error occurred while applying changes: %s", e));
-            logger.println("- Checking whether the changes have been applied anyway...\n");
-            if (!wereAppFilesUploaded(uploadedVersionCodes)) {
-                logger.println("The files that were uploaded were not found on Google Play");
-                logger.println("- No changes have been applied to the Google Play account");
-                return false;
-            }
-        }
-
-        // If committing didn't throw an exception, everything worked fine
-        logger.println("Changes were successfully applied to Google Play");
+        // Commit the changes, which will throw an exception if there is a problem
+        commit();
         return true;
     }
 
@@ -352,33 +333,6 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
         }
 
         return response;
-    }
-
-    /**
-     * Starts a new API session and determines whether a list of version codes were successfully uploaded.
-     *
-     * @param uploadedVersionCodes The list to be checked for existence.
-     * @return {@code true} if the version codes in the list were found to now exist on Google Play.
-     */
-    private boolean wereAppFilesUploaded(Collection<Long> uploadedVersionCodes) throws IOException {
-        // Last edit is finished; create a new one to get the current state
-        createEdit(applicationId);
-
-        // Get the current list of version codes from Google Play
-        List<Long> currentVersionCodes = new ArrayList<>();
-        List<Apk> currentApks = editService.apks().list(applicationId, editId).execute().getApks();
-        if (currentApks == null) currentApks = Collections.emptyList();
-        for (Apk apk : currentApks) {
-            currentVersionCodes.add(Long.valueOf(apk.getVersionCode()));
-        }
-        List<Bundle> currentBundles = editService.bundles().list(applicationId, editId).execute().getBundles();
-        if (currentBundles == null) currentBundles = Collections.emptyList();
-        for (Bundle bundle : currentBundles) {
-            currentVersionCodes.add(Long.valueOf(bundle.getVersionCode()));
-        }
-
-        // The upload succeeded if the current list of version codes intersects with the list we tried to upload
-        return uploadedVersionCodes.removeAll(currentVersionCodes);
     }
 
     @Nullable

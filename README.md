@@ -344,8 +344,6 @@ In these cases you can try running your build again, or wait a few hours before 
 
 Please also consider [contacting Google Play Developer Support][gp-support-form] to help make them aware that people use the Google Play API, and that it should preferably work in a reliable manner.
 
-This plugin already recognises some temporary Google Play API server problems and works around them; more workarounds may be added in future, e.g. automatically retrying when a generic server error is encountered.
-
 ### Unable to retrieve an access token with the provided credentials
 If you see this error message, look further down the error log to see what is causing it. Below are a couple of common causes:
 
