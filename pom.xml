@@ -16,7 +16,7 @@
   </properties>
 
   <artifactId>google-play-android-publisher</artifactId>
-  <version>4.2</version>
+  <version>4.3-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>Google Play Android Publisher Plugin</name>
@@ -213,7 +213,7 @@
     <connection>scm:git:git://github.com/jenkinsci/google-play-android-publisher-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/google-play-android-publisher-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/google-play-android-publisher-plugin</url>
-    <tag>google-play-android-publisher-4.2</tag>
+    <tag>HEAD</tag>
   </scm>
 
 </project>
