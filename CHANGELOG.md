@@ -1,5 +1,21 @@
 # Version history
 
+## 4.2
+August 21, 2021
+
+### New features ✨
+- Added the ability to use [Internal App Sharing](https://support.google.com/googleplay/android-developer/answer/9844679) ([JENKINS-62405](https://issues.jenkins-ci.org/browse/JENKINS-62405), [#44](https://github.com/jenkinsci/google-play-android-publisher-plugin/pull/44))
+  - Using `internal-app-sharing` as the release track name will upload the given app files to Internal App Sharing, and output the download URL to the build log
+- Added the ability to retain certain app files from a previous release when creating a new release ([JENKINS-66099](https://issues.jenkins-ci.org/browse/JENKINS-66099), [#42](https://github.com/jenkinsci/google-play-android-publisher-plugin/pull/42); thanks to [Entreco](https://github.com/Entreco))
+
+### Bug fixes 🐛
+- Fixed crash when attempting to parse manifest information from certain AAB files ([JENKINS-65475](https://issues.jenkins-ci.org/browse/JENKINS-65475), [#41](https://github.com/jenkinsci/google-play-android-publisher-plugin/pull/41))
+- Fixed handling of changes that "cannot be sent for review automatically" ([JENKINS-65815](https://issues.jenkins-ci.org/browse/JENKINS-65815), [#43](https://github.com/jenkinsci/google-play-android-publisher-plugin/pull/43))
+  - The `changesNotSentForReview` flag is now automatically enabled if Google Play rejects an upload with this error
+
+### Miscellaneous 🦆
+- Increased the minimum Jenkins version to [2.222.4](https://www.jenkins.io/changelog-stable/#v2.222.4)
+
 ## 4.1
 January 18, 2021
 
