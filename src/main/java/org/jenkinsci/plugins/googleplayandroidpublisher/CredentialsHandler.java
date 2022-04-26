@@ -88,7 +88,7 @@ public class CredentialsHandler {
             return Collections.emptyList();
         }
 
-        // As per the Credentials Plugin docs: https://git.io/JfW7R
+        // As per the Credentials Plugin docs: https://github.com/jenkinsci/credentials-plugin/blob/2f9bf725/docs/consumer.adoc#listing-available-credentials-matching-some-specific-set-of-criteria
         Authentication auth = item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM;
         return CredentialsProvider.lookupCredentials(
             GoogleRobotCredentials.class, item, auth, ImmutableList.of(requirement)
