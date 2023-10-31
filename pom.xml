@@ -10,8 +10,8 @@
 
   <properties>
     <jenkins.version>2.387.3</jenkins.version>
-    <jenkins.bom.artifactId>2.222.x</jenkins.bom.artifactId>
-    <jenkins.bom.version>29</jenkins.bom.version>
+    <jenkins.bom.artifactId>bom-2.387.x</jenkins.bom.artifactId>
+    <jenkins.bom.version>2329.v078520e55c19</jenkins.bom.version>
     <java.level>8</java.level>
   </properties>
 
