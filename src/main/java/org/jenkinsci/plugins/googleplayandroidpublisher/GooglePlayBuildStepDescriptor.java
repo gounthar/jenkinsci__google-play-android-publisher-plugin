@@ -40,7 +40,7 @@ public abstract class GooglePlayBuildStepDescriptor<T extends BuildStep & Descri
 
         ListBoxModel credentials = getCredentialsListBox(item);
         if (credentials.isEmpty()) {
-            credentials.add("(No Google Play account credentials have been added to Jenkins)", null);
+            credentials.add("(No Google Play account credentials have been added to Jenkins)", "");
         }
         return credentials;
     }
