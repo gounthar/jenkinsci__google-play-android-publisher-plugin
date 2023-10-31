@@ -6,7 +6,7 @@ import com.google.api.services.androidpublisher.model.TrackRelease;
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
 import hudson.model.TaskListener;
 
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;

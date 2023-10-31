@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.googleplayandroidpublisher;
 
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.AbortException;
 import hudson.Extension;
@@ -15,8 +16,7 @@ import org.jenkinsci.plugins.googleplayandroidpublisher.internal.UploadFile;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -116,11 +116,11 @@ public class ReleaseTrackAssignmentBuilder extends GooglePlayBuilder {
     }
 
     @DataBoundSetter
-    public void setFilesPattern(@Nonnull String pattern) {
+    public void setFilesPattern(@NonNull String pattern) {
         this.filesPattern = DescriptorImpl.defaultFilesPattern.equals(pattern) ? null : pattern;
     }
 
-    @Nonnull
+    @NonNull
     public String getFilesPattern() {
         return fixEmptyAndTrim(filesPattern) == null ? DescriptorImpl.defaultFilesPattern : filesPattern;
     }
@@ -128,7 +128,7 @@ public class ReleaseTrackAssignmentBuilder extends GooglePlayBuilder {
     @DataBoundSetter
     @SuppressWarnings("ConstantConditions")
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    public void setRolloutPercentage(@Nonnull String percentage) {
+    public void setRolloutPercentage(@NonNull String percentage) {
         // If the value is an expression, just store it directly
         if (percentage.matches(REGEX_VARIABLE)) {
             this.rolloutPercentage = percentage;
@@ -301,8 +301,8 @@ public class ReleaseTrackAssignmentBuilder extends GooglePlayBuilder {
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
-                        @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull Launcher launcher,
+                        @NonNull TaskListener listener) throws InterruptedException, IOException {
         super.perform(run, workspace, launcher, listener);
 
         // Calling assignAppFiles logs the reason when a failure occurs, so in that case we just need to throw here
@@ -312,7 +312,7 @@ public class ReleaseTrackAssignmentBuilder extends GooglePlayBuilder {
     }
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    private boolean assignAppFiles(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener)
+    private boolean assignAppFiles(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull TaskListener listener)
             throws IOException, InterruptedException {
         final PrintStream logger = listener.getLogger();
 

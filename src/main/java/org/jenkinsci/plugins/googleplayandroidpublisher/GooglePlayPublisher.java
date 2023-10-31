@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.googleplayandroidpublisher;
 
 import com.google.jenkins.plugins.credentials.domains.RequiresDomain;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
@@ -10,8 +11,7 @@ import hudson.tasks.Recorder;
 import jenkins.tasks.SimpleBuildStep;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 
 @RequiresDomain(value = AndroidPublisherScopeRequirement.class)
@@ -34,8 +34,8 @@ public abstract class GooglePlayPublisher extends Recorder implements SimpleBuil
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
-                        @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull Launcher launcher,
+                        @NonNull TaskListener listener) throws InterruptedException, IOException {
         currentBuild.set(run);
         currentListener.set(listener);
     }

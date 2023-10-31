@@ -19,7 +19,7 @@ import org.jenkinsci.plugins.googleplayandroidpublisher.internal.UtilsImpl;
 import org.jenkinsci.plugins.tokenmacro.MacroEvaluationException;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;

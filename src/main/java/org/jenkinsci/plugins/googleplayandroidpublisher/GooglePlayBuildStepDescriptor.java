@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.googleplayandroidpublisher;
 
 import com.cloudbees.plugins.credentials.CredentialsNameProvider;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.AbstractProject;
 import hudson.model.Describable;
@@ -15,7 +16,6 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -76,7 +76,7 @@ public abstract class GooglePlayBuildStepDescriptor<T extends BuildStep & Descri
         return FormValidation.ok();
     }
 
-    @Nonnull
+    @NonNull
     private static ListBoxModel getCredentialsListBox(Item item) {
         ListBoxModel listBox = new ListBoxModel();
         CredentialsHandler.getCredentials(item).forEach(credential -> {

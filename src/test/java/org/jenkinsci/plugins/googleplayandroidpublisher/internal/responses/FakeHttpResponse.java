@@ -6,7 +6,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.TestUtilImpl;
 
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;

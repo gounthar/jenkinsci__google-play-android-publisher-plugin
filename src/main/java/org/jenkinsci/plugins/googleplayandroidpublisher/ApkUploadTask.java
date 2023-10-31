@@ -9,13 +9,13 @@ import com.google.api.services.androidpublisher.model.ExpansionFilesUploadRespon
 import com.google.api.services.androidpublisher.model.LocalizedText;
 import com.google.api.services.androidpublisher.model.Track;
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.AppFileFormat;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.UploadFile;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -336,7 +336,7 @@ class ApkUploadTask extends TrackPublisherTask<Boolean> {
     }
 
     @Nullable
-    private static String expandReleaseName(@Nullable String releaseName, @Nonnull List<UploadFile> appFilesToUpload) {
+    private static String expandReleaseName(@Nullable String releaseName, @NonNull List<UploadFile> appFilesToUpload) {
         if (releaseName == null) {
             return null;
         }

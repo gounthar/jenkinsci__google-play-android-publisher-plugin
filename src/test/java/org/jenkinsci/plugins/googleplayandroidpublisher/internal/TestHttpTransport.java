@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import org.jenkinsci.plugins.googleplayandroidpublisher.internal.responses.FakeHttpResponse;
 
 public class TestHttpTransport extends MockHttpTransport implements Serializable {

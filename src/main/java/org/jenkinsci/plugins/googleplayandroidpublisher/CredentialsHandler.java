@@ -7,6 +7,7 @@ import com.google.jenkins.plugins.credentials.oauth.GoogleOAuth2ScopeRequirement
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotPrivateKeyCredentials.AccountIdNotSetException;
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotPrivateKeyCredentials.PrivateKeyNotSetException;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Item;
 import hudson.model.Queue;
@@ -15,8 +16,7 @@ import hudson.security.ACL;
 import org.acegisecurity.Authentication;
 import org.apache.commons.lang.exception.ExceptionUtils;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -79,7 +79,7 @@ public class CredentialsHandler {
     }
 
     /** @return A list of Google Play-compatible credentials visible to the given item. */
-    @Nonnull
+    @NonNull
     static List<GoogleRobotCredentials> getCredentials(Item item) {
         GoogleOAuth2ScopeRequirement requirement = DomainRequirementProvider.of(
             GooglePlayPublisher.class, GoogleOAuth2ScopeRequirement.class

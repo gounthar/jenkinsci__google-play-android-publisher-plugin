@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.googleplayandroidpublisher;
 
 import com.google.jenkins.plugins.credentials.oauth.GoogleRobotCredentials;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.AbortException;
 import hudson.Extension;
@@ -25,8 +26,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.export.Exported;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
@@ -117,7 +117,7 @@ public class ApkPublisher extends GooglePlayPublisher {
         this.filesPattern = DescriptorImpl.defaultFilesPattern.equals(pattern) ? null : pattern;
     }
 
-    @Nonnull
+    @NonNull
     public String getFilesPattern() {
         return fixEmptyAndTrim(filesPattern) == null ? DescriptorImpl.defaultFilesPattern : filesPattern;
     }
@@ -125,7 +125,7 @@ public class ApkPublisher extends GooglePlayPublisher {
     @DataBoundSetter
     @SuppressWarnings("ConstantConditions")
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
-    public void setRolloutPercentage(@Nonnull String percentage) {
+    public void setRolloutPercentage(@NonNull String percentage) {
         // If the value is an expression, just store it directly
         if (percentage.matches(REGEX_VARIABLE)) {
             this.rolloutPercentage = percentage;
@@ -320,7 +320,7 @@ public class ApkPublisher extends GooglePlayPublisher {
         return expand(getAdditionalVersionCodes());
     }
 
-    @Nonnull
+    @NonNull
     private List<Long> getExpandedAdditionalVersionCodes() throws IOException, InterruptedException {
         String versionCodesStr = getExpandedAdditionalVersionCodesString();
         if (versionCodesStr == null) {
@@ -402,8 +402,8 @@ public class ApkPublisher extends GooglePlayPublisher {
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
-                        @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull Launcher launcher,
+                        @NonNull TaskListener listener) throws InterruptedException, IOException {
         super.perform(run, workspace, launcher, listener);
 
         // Calling publishApk logs the reason when a failure occurs, so in that case we just need to throw here
@@ -412,7 +412,7 @@ public class ApkPublisher extends GooglePlayPublisher {
         }
     }
 
-    private boolean publishApk(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull TaskListener listener)
+    private boolean publishApk(@NonNull Run<?, ?> run, @NonNull FilePath workspace, @NonNull TaskListener listener)
             throws InterruptedException, IOException {
         final PrintStream logger = listener.getLogger();
 
